@@ -27,22 +27,32 @@ package view {
 			addChild(btn);
 			
 			btn = _createBtn('导出布局');
-			btn.x = 100;
+			btn.x = 80;
 			btn.y = (height - 30) >> 1;
 			btn.addEventListener(MouseEvent.CLICK, _onExportXML);
 			addChild(btn);
 			
 			btn = _createBtn('增加线槽', 0x5b9bd5);
-			btn.x = 200;
+			btn.x = 160;
 			btn.y = (height - 30) >> 1;
 			btn.addEventListener(MouseEvent.CLICK, _onAddXianCao);
 			addChild(btn);
 			
 			btn = _createBtn('增加轨道', 0xffc000);
-			btn.x = 300;
+			btn.x = 240;
 			btn.y = (height - 30) >> 1;
 			btn.addEventListener(MouseEvent.CLICK, _onAddGuiDao);
 			addChild(btn);
+			
+			btn = _createBtn('虚拟轨道', 0xffc000);
+			btn.x = 320;
+			btn.y = (height - 30) >> 1;
+			btn.addEventListener(MouseEvent.CLICK, _onAddJiaGuiDao);
+			addChild(btn);
+		}
+		
+		private function _onAddJiaGuiDao(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.ADD_JIA_GUI_DAO));
 		}
 		
 		private function _onAddGuiDao(e:MouseEvent):void {

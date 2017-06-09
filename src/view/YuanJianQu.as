@@ -3,6 +3,7 @@ package view {
 	import events.LayoutEvent;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import model.YuanJian;
 	import model.YuanJianManager;
 	
@@ -46,15 +47,23 @@ package view {
 			var yuanJian:YuanJian;
 			for (var i:int = 0; i < YuanJianManager.instance.itemArr.length; i++) {
 				yuanJian = YuanJianManager.instance.itemArr[i];
-				if (x + yuanJian.reallyWidth > _w){
+				if (x + yuanJian.reallyWidth > _w) {
 					x = 0;
 					y = maxY + gap
 				}
 				yuanJian.x = x;
 				yuanJian.y = y;
+				yuanJian.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDrag);
 				addChild(yuanJian);
 				x += yuanJian.reallyWidth + gap;
 				maxY = yuanJian.reallyHeight + yuanJian.y > maxY ? yuanJian.reallyHeight + yuanJian.y : maxY;
+			}
+		}
+		
+		private function _onStartDrag(e:MouseEvent):void {
+			const yuanJian:YuanJian = e.currentTarget as YuanJian;
+			if (yuanJian.parent == this) {
+				dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, yuanJian));
 			}
 		}
 	

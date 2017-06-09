@@ -35,9 +35,11 @@ package model {
 			addChild(_nameTF);
 		}
 		
-		public function setSize(w:int, h:int):void {
-			this._w = w;
-			this._h = h;
+		public function setSize(w:int, h:int = -1):void {
+			if (w > -1)
+				this._w = w;
+			if (h > -1)
+				this._h = h;
 			this._drawBorder();
 		}
 		
