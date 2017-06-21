@@ -17,6 +17,8 @@ package config {
 		
 		private var _xml:XML;
 		
+		private var _layoutXML:XML;
+		
 		public function ConfigUtil() {
 		
 		}
@@ -32,7 +34,7 @@ package config {
 			loadurl.removeEventListener(Event.COMPLETE, _Loadxml);
 			_xml = XML(loadurl.data);
 			
-			YuanJianManager.instance.itemArr.length = 0;
+			YuanJianManager.instance.clear();
 			var tempArr:Array = null;
 			var tempArr1:Array = null;
 			for each (var item:* in _xml.items.item) {
@@ -42,7 +44,20 @@ package config {
 				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name));
 			}
 			
-			this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML_OK, _xml));
+			const layoutXmlName:String = _xml.layout.@name;
+			if (layoutXmlName) {
+				loadurl.load(new URLRequest(layoutXmlName + '.xml'));
+				loadurl.addEventListener(Event.COMPLETE, _loadLayoutxml);
+			} else {
+				this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML_OK, _xml));
+			}
+		}
+		
+		private function _loadLayoutxml(e:Event):void {
+			var loadurl:URLLoader = e.currentTarget as URLLoader;
+			loadurl.removeEventListener(Event.COMPLETE, _loadLayoutxml);
+			_layoutXML = XML(loadurl.data);
+			this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML_OK, _xml, null, false, null, _layoutXML));
 		}
 		
 		public static function get instance():ConfigUtil {

@@ -1,6 +1,9 @@
 package {
 	import flash.display.Sprite;
+	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.net.FileReference;
+	import flash.net.SharedObject;
 	import view.MainScene;
 	
 	/**
@@ -9,7 +12,7 @@ package {
 	 */
 	public class Main extends Sprite {
 		
-		private var _mainScene:MainScene;
+		public static var mainScene:MainScene;
 		
 		public function Main() {
 			if (stage) init();
@@ -20,11 +23,15 @@ package {
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			//stage.scaleMode = StageScaleMode.EXACT_FIT;
+			stage.scaleMode = StageScaleMode.NO_SCALE;
 			//this.stage.addEventListener(Event.RESIZE, _noResize);
 			
-			_mainScene = new MainScene(this.stage.stageWidth, this.stage.stageHeight);
-			addChild(_mainScene);
+			mainScene = new MainScene(this.stage.stageWidth, this.stage.stageHeight);
+			addChild(mainScene);
+			
+			
+			//var fileRef:FileReference = new FileReference();
+			//fileRef.save('test', "wenben.txt");
 		}
 		
 		//private function _noResize(evt:Event):void {

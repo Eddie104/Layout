@@ -1,10 +1,14 @@
 package view {
 	import events.LayoutEvent;
+	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.text.TextField;
 	import model.Cell;
 	import model.GuiDao;
+	import model.KaKou;
+	import model.XianCao;
 	import model.YuanJian;
 	
 	/**
@@ -41,6 +45,10 @@ package view {
 		
 		private var _parent:Cell;
 		
+		private var _copyBtn:Sprite;
+		
+		private var _deleteBtn:Sprite;
+		
 		public function ScaleLine() {
 			super();
 			
@@ -53,6 +61,11 @@ package view {
 			_leftBottomRect = initRect();
 			_leftRect = initRect();
 			_centerRect = initRect();
+			
+			_copyBtn = _createBtn('复制');
+			_copyBtn.addEventListener(MouseEvent.CLICK, _onCopy);
+			_deleteBtn = _createBtn('删除');
+			_deleteBtn.addEventListener(MouseEvent.CLICK, _onDelete);
 		}
 		
 		private function initRect():ScaleRect {
@@ -70,12 +83,64 @@ package view {
 			if (_parent) {
 				_parent.addChild(this);
 				resetRect();
+				_resetBtn();
 			} else {
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL));
 			}
 		}
 		
-		private function resetRect():void {
+		public function get parentCell():Cell {
+			return this._parent;
+		}
+		
+		private function _resetBtn():void {
+			if (_parent is GuiDao || _parent is XianCao) {
+				if (_parent is GuiDao && (_parent as GuiDao).isJiaDe) {
+					if (_copyBtn.parent == this) {
+						removeChild(_copyBtn);
+					}
+				} else {
+					if (_copyBtn.parent != this) {
+						addChild(_copyBtn);
+					}
+				}
+				
+				if (_deleteBtn.parent != this) {
+					addChild(_deleteBtn);
+				}
+				_copyBtn.x = 0;
+				_copyBtn.y = _parent.reallyHeight + 10;
+				_deleteBtn.x = _copyBtn.parent == this ? 50 : 0;
+				_deleteBtn.y = _parent.reallyHeight + 10;
+			} else {
+				if (_copyBtn.parent == this) {
+					removeChild(_copyBtn);
+				}
+				if (_parent is YuanJian) {
+					if (_deleteBtn.parent != this) {
+						addChild(_deleteBtn);
+					}
+					_deleteBtn.x = 0;
+					_deleteBtn.y = _parent.reallyHeight;
+				} else {
+					if (_deleteBtn.parent == this) {
+						removeChild(_deleteBtn);
+					}
+				}
+			}
+		}
+		
+		private function _onCopy(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.COPY));
+			e.stopImmediatePropagation();
+		}
+		
+		private function _onDelete(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.DELETE));
+			e.stopImmediatePropagation();
+		}
+		
+		public function resetRect():void {
 			_leftTopRect.x = 0;
 			_leftTopRect.y = 0;
 			_topRect.x = _parent.reallyWidth >> 1;
@@ -95,6 +160,17 @@ package view {
 			_centerRect.x = _parent.reallyWidth >> 1;
 			_centerRect.y = _parent.reallyHeight >> 1;
 			
+			/*if (_parent is KaKou){
+			   _leftTopRect.isEnabeld = true;
+			   _topRect.isEnabeld = true;
+			   _rightTopRect.isEnabeld = true;
+			   _rightRect.isEnabeld = true;
+			   _rightBottomRect.isEnabeld = true;
+			   _bottomRect.isEnabeld = true;
+			   _leftBottomRect.isEnabeld = true;
+			   _leftRect.isEnabeld = true;
+			   _centerRect.isEnabeld = true;
+			   } else */
 			if ((_parent is GuiDao && (_parent as GuiDao).isJiaDe) || _parent is YuanJian) {
 				_leftTopRect.isEnabeld = false;
 				_topRect.isEnabeld = false;
@@ -118,17 +194,37 @@ package view {
 			}
 		}
 		
+		private function onMouseDown(evt:MouseEvent):void {
+			_movingRect = evt.currentTarget as ScaleRect;
+			_lastX = evt.stageX;
+			_lastY = evt.stageY;
+		}
+		
+		private function _createBtn(name:String):Sprite {
+			var s:Sprite = new Sprite();
+			s.mouseChildren = false;
+			const g:Graphics = s.graphics;
+			g.beginFill(0x00ff00);
+			g.drawRect(0, 0, 40, 20);
+			g.endFill();
+			s.width = 40;
+			s.height = 20;
+			var tf:TextField = new TextField();
+			tf.mouseEnabled = false;
+			tf.width = 40;
+			tf.height = 20;
+			tf.text = name;
+			tf.x = (40 - tf.textWidth) >> 1;
+			tf.y = (20 - tf.textHeight) >> 1;
+			s.addChild(tf);
+			return s;
+		}
+		
 		public static function get instance():ScaleLine {
 			if (!ScaleLine._instance) {
 				ScaleLine._instance = new ScaleLine();
 			}
 			return ScaleLine._instance;
-		}
-		
-		private function onMouseDown(evt:MouseEvent):void {
-			_movingRect = evt.currentTarget as ScaleRect;
-			_lastX = evt.stageX;
-			_lastY = evt.stageY;
 		}
 		
 		public function mouseMoved(stageX:int, stageY:int):void {
@@ -141,17 +237,17 @@ package view {
 				switch (_movingRect) {
 				case _leftTopRect: 
 					var p:Point = this.localToGlobal(new Point(_movingRect.x, _movingRect.y));
-					_parent.x = p.x;
-					_parent.y = p.y;
+					_parent.x = p.x / BuJuQu.containerScale;
+					_parent.y = p.y / BuJuQu.containerScale;
 					_parent.setSize(_rightTopRect.x - _leftTopRect.x, _rightBottomRect.y - _movingRect.y);
 					break;
 				case _topRect: 
-					_parent.y = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).y;
+					_parent.y = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).y / BuJuQu.containerScale;
 					_parent.setSize(-1, _rightBottomRect.y - _movingRect.y);
 					break;
 				case _rightTopRect: 
 					p = this.localToGlobal(new Point(_movingRect.x, _movingRect.y));
-					_parent.y = p.y;
+					_parent.y = p.y / BuJuQu.containerScale;
 					_parent.setSize(_rightTopRect.x - _leftTopRect.x, _rightBottomRect.y - _movingRect.y);
 					break;
 				case _rightRect: 
@@ -164,25 +260,36 @@ package view {
 					_parent.setSize(-1, _bottomRect.y - _rightTopRect.y);
 					break;
 				case _leftBottomRect: 
-					_parent.x = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).x;
+					_parent.x = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).x / BuJuQu.containerScale;
 					_parent.setSize(_rightBottomRect.x - _leftBottomRect.x, _leftBottomRect.y - _rightTopRect.y);
 					break;
 				case _leftRect: 
-					_parent.x = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).x;
+					_parent.x = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).x / BuJuQu.containerScale;
 					_parent.setSize(_rightRect.x - _leftRect.x);
 					break;
 				case _centerRect: 
 					if (_parent is YuanJian) {
-						(_parent as YuanJian).offsetX += stageX - _lastX;
+						var guiDao:GuiDao;
+						const arr:Array = Main.mainScene.buJuQu.getObjectsUnderPoint(new Point(stageX, stageY));
+						for (var i:int = 0; i < arr.length; i++) {
+							if (arr[i] is GuiDao) {
+								guiDao = arr[i] as GuiDao;
+								if (guiDao == this._parent.parent) {
+									(_parent as YuanJian).offsetX += stageX - _lastX;
+									break;
+								}
+							}
+						}
 					} else {
-						_parent.y += stageY - _lastY;
+						_parent.y += (stageY - _lastY) / BuJuQu.containerScale;
 						if (!(_parent is GuiDao) || !((_parent as GuiDao).isJiaDe)) {
-							_parent.x += stageX - _lastX;
+							_parent.x += (stageX - _lastX) / BuJuQu.containerScale;
 						}
 					}
 					break;
 				}
 				resetRect();
+				_resetBtn();
 				_lastX = stageX;
 				_lastY = stageY;
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));

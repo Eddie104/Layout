@@ -154,24 +154,36 @@ package view {
 		protected function _onHeightChanged(e:Event):void {
 			if (_curCell) {
 				_curCell.setSize(_curCell.reallyWidth, int(_heightTF.text));
+				if (ScaleLine.instance.parentCell == _curCell){
+					ScaleLine.instance.resetRect();
+				}
 			}
 		}
 		
 		protected function _onWidthChanged(e:Event):void {
 			if (_curCell) {
 				_curCell.setSize(int(_widthTF.text), _curCell.reallyHeight);
+				if (ScaleLine.instance.parentCell == _curCell){
+					ScaleLine.instance.resetRect();
+				}
 			}
 		}
 		
 		protected function _onYChanged(e:Event):void {
 			if (_curCell) {
 				_curCell.y = int(_yTF.text);
+				if (ScaleLine.instance.parentCell == _curCell){
+					ScaleLine.instance.resetRect();
+				}
 			}
 		}
 		
 		protected function _onXChanged(e:Event):void {
 			if (this._curCell) {
 				_curCell.x = int(_xTF.text);
+				if (ScaleLine.instance.parentCell == _curCell){
+					ScaleLine.instance.resetRect();
+				}
 			}
 		}
 	}

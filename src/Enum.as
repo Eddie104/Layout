@@ -1,4 +1,5 @@
 package {
+	
 	/**
 	 * ...
 	 * @author hongjie
@@ -9,10 +10,20 @@ package {
 		
 		public static const V:int = 1;
 		
-		public function Enum() {
-			
-		}
+		public static const V_XIAN_CAO:int = 0;
 		
+		public static const H_XIAN_CAO:int = 1;
+		
+		public static const GUI_DAO:int = 2;
+		
+		public static const KA_KOU:int = 3;
+		
+		public static const JIA_GUI_DAO:int = 4;
+		
+		public function Enum() {
+		
+		}
+	
 	}
 
 }

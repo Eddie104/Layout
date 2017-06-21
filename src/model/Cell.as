@@ -40,6 +40,8 @@ package model {
 				this._w = w;
 			if (h > -1)
 				this._h = h;
+			_nameTF.x = (_w - _nameTF.textWidth) >> 1;
+			_nameTF.y = (_h - _nameTF.textHeight) >> 1;
 			this._drawBorder();
 		}
 		
@@ -83,6 +85,10 @@ package model {
 			this._nameTF.text = value;
 			_nameTF.x = (_w - _nameTF.textWidth) >> 1;
 			_nameTF.y = (_h - _nameTF.textHeight) >> 1;
+		}
+		
+		public function toXML():String{
+			return '';
 		}
 	
 	}

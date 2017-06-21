@@ -9,6 +9,7 @@ package view {
 	import flash.text.TextFieldType;
 	import model.Cell;
 	import model.GuiDao;
+	import model.KaKou;
 	import model.XianCao;
 	import model.YuanJian;
 	
@@ -28,6 +29,8 @@ package view {
 		
 		private var _shuXingYuanJian:ShuXingYuanJian;
 		
+		private var _shuXingKaKou:ShuXingKaKou;
+		
 		private var _curShuXing:ShuXing;
 		
 		public function ShuXingQu(width:int, height:int, buJuQu:BuJuQu) {
@@ -41,6 +44,7 @@ package view {
 			_shuxingXianCao = new ShuXingXianCao(width, height);
 			_shuXingGuiDao = new ShuXingGuiDao(width, height);
 			_shuXingYuanJian = new ShuXingYuanJian(width, height);
+			_shuXingKaKou = new ShuXingKaKou(width, height);
 			
 			this._buJuQu = buJuQu;
 			_buJuQu.addEventListener(LayoutEvent.ADD_GUI_DAO, _onAddGuidao);
@@ -79,6 +83,14 @@ package view {
 							removeChild(_curShuXing);
 						}
 						this._curShuXing = _shuXingGuiDao;
+						addChild(_curShuXing);
+					}
+				} else if (cell is KaKou){
+					if (this._curShuXing != _shuXingKaKou) {
+						if (this._curShuXing) {
+							removeChild(_curShuXing);
+						}
+						this._curShuXing = _shuXingKaKou;
 						addChild(_curShuXing);
 					}
 				} else if (cell is YuanJian) {

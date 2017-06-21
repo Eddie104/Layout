@@ -5,14 +5,15 @@ package view {
 	import flash.text.TextFieldType;
 	import model.Cell;
 	import model.YuanJian;
+	
 	/**
 	 * ...
 	 * @author hongjie
 	 */
-	public final class ShuXingYuanJian extends ShuXing {
+	public class ShuXingYuanJian extends ShuXing {
 		
-		public function ShuXingYuanJian(width:int, height:int) {
-			super(width, height, '元件');
+		public function ShuXingYuanJian(width:int, height:int, type:String = '元件') {
+			super(width, height, type);
 		}
 		
 		override protected function _init(width:int, height:int):void {
@@ -40,7 +41,7 @@ package view {
 		
 		override public function setCurCell(cell:Cell):void {
 			_curCell = cell;
-			if (cell){
+			if (cell) {
 				this._xTF.text = (cell as YuanJian).offsetX.toString();
 			}
 		}
@@ -48,9 +49,12 @@ package view {
 		override protected function _onXChanged(e:Event):void {
 			if (this._curCell) {
 				(_curCell as YuanJian).offsetX = int(_xTF.text);
+				if (ScaleLine.instance.parentCell == _curCell) {
+					ScaleLine.instance.resetRect();
+				}
 			}
 		}
-		
+	
 	}
 
 }
