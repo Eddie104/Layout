@@ -1,5 +1,6 @@
 package model {
 	import flash.display.Graphics;
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.filters.GlowFilter;
 	import flash.text.TextField;
@@ -20,10 +21,16 @@ package model {
 		
 		protected var _isSelected:Boolean;
 		
+		protected var _redundantShap:Shape;
+		
 		protected var _nameTF:TextField = new TextField();
 		
 		public function Cell(width:int, height:int, bgColor:int) {
 			super();
+			_redundantShap = new Shape();
+			_redundantShap.visible = false;
+			addChild(_redundantShap);
+			
 			this._bgColor = bgColor;
 			this.setSize(width, height);
 			_nameTF.mouseEnabled = false;
@@ -32,7 +39,7 @@ package model {
 			_nameTF.textColor = 0xffffff;
 			_nameTF.multiline = true;
 			_nameTF.wordWrap = true;
-			addChild(_nameTF);
+			addChildAt(_nameTF, 0);
 		}
 		
 		public function setSize(w:int, h:int = -1):void {
@@ -57,6 +64,13 @@ package model {
 			g.beginFill(_bgColor);
 			g.drawRect(0, 0, _w, _h);
 			g.endFill();
+			
+			_redundantShap.graphics.clear();
+			_redundantShap.graphics.lineStyle(1, 0xff0000);
+			_redundantShap.graphics.moveTo(0, 0);
+			_redundantShap.graphics.lineTo(_w, _h);
+			_redundantShap.graphics.moveTo(_w, 0);
+			_redundantShap.graphics.lineTo(0, _h);
 		}
 		
 		public function get isSelected():Boolean {
@@ -85,6 +99,14 @@ package model {
 			this._nameTF.text = value;
 			_nameTF.x = (_w - _nameTF.textWidth) >> 1;
 			_nameTF.y = (_h - _nameTF.textHeight) >> 1;
+		}
+		
+		public function get isRedundant():Boolean {
+			return _redundantShap.visible;
+		}
+		
+		public function set isRedundant(value:Boolean):void {
+			_redundantShap.visible = value;
 		}
 		
 		public function toXML():String{

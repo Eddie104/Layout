@@ -11,6 +11,8 @@ package model {
 		
 		private var _dir:int;
 		
+		private var _typeStr:String = '';
+		
 		private var _isJiaDe:Boolean;
 		
 		private var _yuanJianArr:Vector.<YuanJian> = new Vector.<YuanJian>();
@@ -33,33 +35,60 @@ package model {
 			return _isJiaDe;
 		}
 		
-		public function addYuanJian(yuanJian:YuanJian, p:Point):Boolean {
+		public function get typeStr():String {
+			return _typeStr;
+		}
+		
+		public function set typeStr(value:String):void {
+			_typeStr = value;
+		}
+		
+		//override public function get name():String {
+		//if (_isJiaDe) return '';
+		//return super.name;
+		//}
+		
+		public function addYuanJian(yuanJianArr:Vector.<YuanJian>, p:Point):Boolean {
 			var insert:Boolean = false;
 			for (var i:int = 0; i < _yuanJianArr.length; i++) {
 				if (p.x < _yuanJianArr[i].x) {
-					_yuanJianArr.splice(i, 0, yuanJian);
+					for (var j:int = 0; j < yuanJianArr.length; j++) {
+						_yuanJianArr.splice(i++, 0, yuanJianArr[j]);
+					}
 					insert = true;
 					break;
 				}
 			}
 			
 			if (!insert) {
-				_yuanJianArr.push(yuanJian);
+				for (i = 0; i < yuanJianArr.length; i++) {
+					_yuanJianArr.push(yuanJianArr[i]);
+				}
 			}
-			// 根据拖动，自动算出offsetX
-			const prevIndex:int = _yuanJianArr.indexOf(yuanJian) - 1;
-			if (prevIndex > -1) {
-				var offsetX:int = p.x - (_yuanJianArr[prevIndex].x + _yuanJianArr[prevIndex].reallyWidth);
-				if (offsetX > 10) {
-					yuanJian.offsetX = offsetX;
+			var yuanJian:YuanJian;
+			for (i = 0; i < yuanJianArr.length; i++) {
+				yuanJian = yuanJianArr[i];
+				// 根据拖动，自动算出offsetX
+				const prevIndex:int = _yuanJianArr.indexOf(yuanJian) - 1;
+				if (i == 0){
+					if (prevIndex > -1) {
+						var offsetX:int = p.x - (_yuanJianArr[prevIndex].x + _yuanJianArr[prevIndex].reallyWidth);
+						if (offsetX > 10) {
+							yuanJian.offsetX = offsetX;
+						} else {
+							yuanJian.offsetX = 0;
+						}
+					}
 				} else {
 					yuanJian.offsetX = 0;
 				}
+				
+				yuanJian.isOnGuiDao = true;
+				yuanJian.guiDao = this;
+				addChild(yuanJian);
+				yuanJian.addEventListener(MouseEvent.CLICK, onYuanJianClicked);
 			}
-			yuanJian.isOnGuiDao = true;
-			yuanJian.guiDao = this;
-			addChild(yuanJian);
-			yuanJian.addEventListener(MouseEvent.CLICK, onYuanJianClicked);
+			
 			resetYuanJian(true);
 			
 			return true;
@@ -76,6 +105,26 @@ package model {
 			if (yuanJian.parent == this)
 				removeChild(yuanJian);
 			yuanJian.removeEventListener(MouseEvent.CLICK, onYuanJianClicked);
+			
+			var topYuanJian:YuanJian = yuanJian.topYuanJian;
+			if (topYuanJian) {
+				if (yuanJian.isOnGuiDao) {
+					topYuanJian.guiDao = null;
+					topYuanJian.removeEventListener(MouseEvent.CLICK, onYuanJianClicked);
+					if (topYuanJian.parent == this)
+						removeChild(topYuanJian);
+				}
+			}
+			var bottomYuanJian:YuanJian = yuanJian.bottomYuanJian;
+			if (bottomYuanJian) {
+				if (yuanJian.isOnGuiDao) {
+					bottomYuanJian.guiDao = null;
+					bottomYuanJian.removeEventListener(MouseEvent.CLICK, onYuanJianClicked);
+					if (bottomYuanJian.parent == this)
+						removeChild(bottomYuanJian);
+				}
+			}
+			
 			if (needReset)
 				resetYuanJian();
 		}
@@ -154,7 +203,7 @@ package model {
 		
 		override public function toXML():String {
 			// <PATHWAY NAME="Path_0001" SIZE="460,10" START="20,700" END= "480,700" />
-			return '<pathway virtual="' + this.isJiaDe + '" name="' + this.name + '" x="' + this.x + '" y="' + this.y + '" w="' + this.reallyWidth + '" h="' + this.reallyHeight + '" />';
+			return '<pathway type="' + _typeStr + '" virtual="' + this.isJiaDe + '" name="' + this.name + '" x="' + this.x + '" y="' + this.y + '" w="' + this.reallyWidth + '" h="' + this.reallyHeight + '" />';
 		}
 		
 		public function yuanJianToXML():String {
@@ -182,7 +231,9 @@ package model {
 		}
 		
 		public function addKaKou(p:Point):void {
-			addYuanJian(new KaKou(20, _h + 20), p);
+			var yuanJianArr:Vector.<YuanJian> = new Vector.<YuanJian>();
+			yuanJianArr[0] = new KaKou(20, _h + 20);
+			addYuanJian(yuanJianArr, p);
 		}
 	
 	}

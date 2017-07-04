@@ -28,11 +28,7 @@ package {
 			
 			mainScene = new MainScene(this.stage.stageWidth, this.stage.stageHeight);
 			addChild(mainScene);
-			
-			
-			//var fileRef:FileReference = new FileReference();
-			//fileRef.save('test', "wenben.txt");
-		}
+			}
 		
 		//private function _noResize(evt:Event):void {
 			//trace("as");

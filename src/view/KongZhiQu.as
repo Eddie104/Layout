@@ -1,10 +1,18 @@
 package view {
+	import config.ConfigUtil;
 	import events.LayoutEvent;
+	import flash.accessibility.Accessibility;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.external.ExternalInterface;
+	import flash.net.FileReference;
 	import flash.system.System;
+	import flash.system.fscommand;
 	import flash.text.TextField;
+	import model.YuanJian;
+	import model.YuanJianManager;
 	
 	/**
 	 * ...
@@ -20,35 +28,152 @@ package view {
 			g.drawRect(0, 0, width, height);
 			g.endFill();
 			
-			var btn:Sprite = _createBtn('载入元件');
+			if (ExternalInterface.available) {
+				ExternalInterface.addCallback("importXML", this._onImportXML);
+				ExternalInterface.addCallback("deleteYuJian", this._onDeleteYuanJian);
+				//ExternalInterface.addCallback("saveXML", this._onSaveXML);
+				ExternalInterface.addCallback("exportXML", this._onExportXML);
+			} else {
+				var btn:Sprite = _createBtn('载入元件');
+				btn.x = 20;
+				btn.addEventListener(MouseEvent.CLICK, _onImportXML);
+				addChild(btn);
+				
+				btn = _createBtn('剔除元件');
+				btn.x = 100;
+				btn.addEventListener(MouseEvent.CLICK, _onDeleteYuanJian);
+				addChild(btn);
+				
+				btn = _createBtn('保存布局');
+				btn.x = 180;
+				btn.addEventListener(MouseEvent.CLICK, _onSaveXML);
+				addChild(btn);
+				
+				btn = _createBtn('导出布局');
+				btn.x = 260;
+				btn.addEventListener(MouseEvent.CLICK, _onExportXML);
+				addChild(btn);
+			}
+			
+			btn = YuanJianQu.createBtn('垂直线槽', 0x5b9bd5);
 			btn.x = 20;
 			btn.y = (height - 30) >> 1;
-			btn.addEventListener(MouseEvent.CLICK, _onImportXML);
+			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragVXianCao);
 			addChild(btn);
 			
-			btn = _createBtn('导出布局');
-			btn.x = 100;
+			btn = YuanJianQu.createBtn('水平线槽', 0x5b9bd5);
+			btn.x = 90;
 			btn.y = (height - 30) >> 1;
-			btn.addEventListener(MouseEvent.CLICK, _onExportXML);
+			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragHXianCao);
 			addChild(btn);
+			
+			btn = YuanJianQu.createBtn('轨道', 0xffc000, 30);
+			btn.x = 160;
+			btn.y = (height - 30) >> 1;
+			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragGuiDao);
+			addChild(btn);
+			
+			btn = YuanJianQu.createBtn('虚拟轨道', 0xffc000);
+			btn.x = 200;
+			btn.y = (height - 30) >> 1;
+			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragJiaGuiDao);
+			addChild(btn);
+			
+			btn = YuanJianQu.createBtn('卡扣', 0x00b050, 30);
+			btn.x = 270;
+			btn.y = (height - 30) >> 1;
+			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragKaKou);
+			addChild(btn);
+		}
 		
-			//btn = _createBtn('增加线槽', 0x5b9bd5);
-			//btn.x = 160;
-			//btn.y = (height - 30) >> 1;
-			//btn.addEventListener(MouseEvent.CLICK, _onAddXianCao);
-			//addChild(btn);
-			//
-			//btn = _createBtn('增加轨道', 0xffc000);
-			//btn.x = 240;
-			//btn.y = (height - 30) >> 1;
-			//btn.addEventListener(MouseEvent.CLICK, _onAddGuiDao);
-			//addChild(btn);
-			//
-			//btn = _createBtn('虚拟轨道', 0xffc000);
-			//btn.x = 320;
-			//btn.y = (height - 30) >> 1;
-			//btn.addEventListener(MouseEvent.CLICK, _onAddJiaGuiDao);
-			//addChild(btn);
+		private function _onStartDragVXianCao(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_V_XIAN_CAO));
+		}
+		
+		private function _onStartDragHXianCao(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_H_XIAN_CAO));
+		}
+		
+		private function _onStartDragGuiDao(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_GUI_DAO));
+		}
+		
+		private function _onStartDragJiaGuiDao(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO));
+		}
+		
+		private function _onStartDragKaKou(e:MouseEvent):void {
+			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_KA_KOU));
+		}
+		
+		private function _onDeleteYuanJian(e:MouseEvent = null):void {
+			const xml:XML = ConfigUtil.instance.xml;
+			const layoutXML:XML = ConfigUtil.instance.layoutXML;
+			var yuanJian:YuanJian;
+			if (layoutXML) {
+				var itemName:String;
+				for each (var item:* in layoutXML.items.item) {
+					itemName = item.@name;
+					if (itemName == 'kaKou') {
+						continue;
+					}
+					for each (var item1:* in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						if (yuanJian.guiDao)
+							yuanJian.guiDao.removeYuanJian(yuanJian);
+						else
+							yuanJian.parent.removeChild(yuanJian);
+					}
+					itemName = item.@topItem;
+					for each (item1 in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						if (yuanJian.guiDao)
+							yuanJian.guiDao.removeYuanJian(yuanJian);
+						else
+							yuanJian.parent.removeChild(yuanJian);
+					}
+					
+					itemName = item.@bottomItem;
+					for each (item1 in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						if (yuanJian.guiDao)
+							yuanJian.guiDao.removeYuanJian(yuanJian);
+						else
+							yuanJian.parent.removeChild(yuanJian);
+					}
+				}
+			}
+		}
+		
+		private function _onSaveXML(e:MouseEvent = null):void {
+			const xmlStr:String = _getXML();
+			var fileRef:FileReference = new FileReference();
+			fileRef.save(xmlStr, ConfigUtil.instance.layoutName + '.xml');
+			fileRef.addEventListener(Event.COMPLETE, _onSaved);
+		}
+		
+		private function _onSaved(e:Event):void {
+			const fileRef:FileReference = e.currentTarget as FileReference;
+			fileRef.removeEventListener(Event.COMPLETE, _onSaved);
+			new Alert("保存布局成功！").show(this.stage);
 		}
 		
 		//private function _onAddJiaGuiDao(e:MouseEvent):void {
@@ -63,47 +188,94 @@ package view {
 		//dispatchEvent(new LayoutEvent(LayoutEvent.ADD_XIAN_CAO));
 		//}
 		
-		private function _onExportXML(e:MouseEvent):void {
-			//trace('export');
-			
-			/*
-			<?xml version="1.0" encoding="UTF-8"?>
-			<Layout>
-			<TRUNKING NAME="Trunk_0001" SIZE="800,10" START="0,0" END= "0,800" />
-			<TRUNKING NAME="Trunk_0002" SIZE="800,10" START="500,0" END= "500,800" />
-			<TRUNKING NAME="Trunk_0003" SIZE="500,10" START="0,800" END= "500,800" />
-			<TRUNKING NAME="Trunk_0004" SIZE="500,10" START="0,600" END= "500,600" />
-			<TRUNKING NAME="Trunk_0005" SIZE="500,10" START="0,350" END= "500,350" />
-			<TRUNKING NAME="Trunk_0006" SIZE="500,10" START="0,0" END= "500,500" />
-			<PATHWAY NAME="Path_0001" SIZE="460,10" START="20,700" END= "480,700" />
-			<PATHWAY NAME="Path_0002" SIZE="460,10" START="20,470" END= "480,470" />
-			<PATHWAY NAME="Path_0003" SIZE="400,10" START="20,175" END= "420,175" />
-			</Layout>
-			<DATA>
-			<ITEM NAME="DK01" PATHWAY="Path_0001" POS="150,700"/>
-			<ITEM NAME="DK02" PATHWAY="Path_0001" POS="250,700"/>
-			<ITEM NAME="TD05" PATHWAY="Path_0001" POS="350,700"/>
-			<ITEM NAME="TD06" PATHWAY="Path_0002" POS="120,470"/>
-			<ITEM NAME="HK01" PATHWAY="Path_0002" POS="200,470"/>
-			<ITEM NAME="HK02" PATHWAY="Path_0002" POS="250,470"/>
-			<ITEM NAME="HK03" PATHWAY="Path_0002" POS="300,470"/>
-			<ITEM NAME="BD08" PATHWAY="" POS="190,175"/>
-			<ITEM NAME="HK04" PATHWAY="" POS="280,175"/>
-			<ITEM NAME="DH01" PATHWAY="" POS="440,175"/>
-			</DATA>
-			*/
+		private function _onExportXML(e:MouseEvent = null):String {
+			const xmlStr:String = _getXML();
+			return xmlStr;
+			//System.setClipboard(xmlStr);
+		
+			//var fileRef:FileReference = new FileReference();
+			//fileRef.save(xmlStr, '.xml');
+			//fileRef.addEventListener(Event.COMPLETE, _onExported);
+		
+			//fscommand(
+		}
+		
+		private function _onExported(e:Event):void {
+			const fileRef:FileReference = e.currentTarget as FileReference;
+			fileRef.removeEventListener(Event.COMPLETE, _onExported);
+			ConfigUtil.instance.layoutName = fileRef.name.split('.')[0];
+			new Alert("导出布局成功！").show(this.stage);
+		}
+		
+		private function _getXML():String {
 			var bujuQu:BuJuQu = Main.mainScene.buJuQu;
-			
 			var xmlStr:String = '<?xml version="1.0" encoding="UTF-8"?>\n<data>\n\t<layout>\n';
 			xmlStr += bujuQu.exportXianCao() + bujuQu.exportGuiDao() + '\n\t</layout>';
 			xmlStr += '\n\t<items>' + bujuQu.exportYuanJian() + '\n\t</items>';
 			xmlStr += '\n</data>';
-			trace(xmlStr);
-			System.setClipboard(xmlStr);
+			return xmlStr;
 		}
 		
-		private function _onImportXML(e:MouseEvent):void {
+		private function _onImportXML(e:MouseEvent = null):void {
+			ConfigUtil.instance.addEventListener(LayoutEvent.IMPORT_XML_OK, _onReset);
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML));
+		}
+		
+		private function _onReset(evt:LayoutEvent):void {
+			// 检测一下在布局区是否有需要被剔除的元件
+			if (_hasYuanJianNeededToBeDeleted()) {
+				new Alert("检测到可剔除元件！").show(this.stage);
+			}
+			//new AlertPanel("sdfdsfds").show(this.stage);
+		}
+		
+		private function _hasYuanJianNeededToBeDeleted():Boolean {
+			var result:Boolean = false;
+			const xml:XML = ConfigUtil.instance.xml;
+			const layoutXML:XML = ConfigUtil.instance.layoutXML;
+			if (layoutXML) {
+				var itemName:String;
+				for each (var item:* in layoutXML.items.item) {
+					itemName = item.@name;
+					if (itemName == 'kaKou') {
+						continue;
+					}
+					for each (var item1:* in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						result = true;
+						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+					}
+					itemName = item.@topItem;
+					for each (item1 in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						result = true;
+						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+					}
+					
+					itemName = item.@bottomItem;
+					for each (item1 in xml.items.item) {
+						if (itemName == item1.@name) {
+							itemName = null;
+							break;
+						}
+					}
+					if (itemName) {
+						result = true;
+						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+					}
+				}
+			}
+			return result;
 		}
 		
 		private function _createBtn(name:String, bgColor:int = 0x9dc3e6, w:int = 60):Sprite {

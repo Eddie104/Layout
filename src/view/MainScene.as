@@ -50,11 +50,11 @@ package view {
 			_yuanJianQu = new YuanJianQu(stageWidth >> 1, stageHeight - bottomPanelHeight);
 			_yuanJianQu.x = stageWidth >> 1;
 			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_YUAN_JIAN, _onStartToDragYuanJian);
-			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_V_XIAN_CAO, _onStartToDragVXianCao);
-			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_H_XIAN_CAO, _onStartToDragHXianCao);
-			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_GUI_DAO, _onStartToDragGuiDao);
-			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO, _onStartToDragJiaGuiDao);
-			_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_KA_KOU, _onStartToDragKaKou);
+			//_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_V_XIAN_CAO, _onStartToDragVXianCao);
+			//_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_H_XIAN_CAO, _onStartToDragHXianCao);
+			//_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_GUI_DAO, _onStartToDragGuiDao);
+			//_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO, _onStartToDragJiaGuiDao);
+			//_yuanJianQu.addEventListener(LayoutEvent.START_TO_DTAG_KA_KOU, _onStartToDragKaKou);
 			_yuanJianQu.addEventListener(LayoutEvent.YUAN_JIAN_QU_INITED, _onYuanJianQuInited);
 			addChild(_yuanJianQu);
 			
@@ -66,23 +66,30 @@ package view {
 			_kongZhiQu.x = stageWidth >> 1;
 			_kongZhiQu.y = stageHeight - bottomPanelHeight;
 			_kongZhiQu.addEventListener(LayoutEvent.IMPORT_XML, _onImportXML);
+			_kongZhiQu.addEventListener(LayoutEvent.START_TO_DTAG_V_XIAN_CAO, _onStartToDragVXianCao);
+			_kongZhiQu.addEventListener(LayoutEvent.START_TO_DTAG_H_XIAN_CAO, _onStartToDragHXianCao);
+			_kongZhiQu.addEventListener(LayoutEvent.START_TO_DTAG_GUI_DAO, _onStartToDragGuiDao);
+			_kongZhiQu.addEventListener(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO, _onStartToDragJiaGuiDao);
+			_kongZhiQu.addEventListener(LayoutEvent.START_TO_DTAG_KA_KOU, _onStartToDragKaKou);
 			addChild(_kongZhiQu);
 			
 			_dragingBitmap = new DragingBitmap();
 			addChild(_dragingBitmap);
+			
+			ScaleLine.instance.addEventListener(LayoutEvent.START_TO_DTAG_YUAN_JIAN, _onStartToDragYuanJian);
 			
 			this.addEventListener(MouseEvent.MOUSE_DOWN, _onMouseDown);
 			this.addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
 			this.addEventListener(MouseEvent.MOUSE_MOVE, _onMouseMoved);
 		}
 		
-		public function get buJuQu():BuJuQu{
+		public function get buJuQu():BuJuQu {
 			return this._buJuQu;
 		}
 		
 		private function _onResetYuanJian(e:LayoutEvent):void {
 			e.yuanJian.isSelected = false;
-			if (e.yuanJian is KaKou){
+			if (e.yuanJian is KaKou) {
 				return;
 			}
 			e.yuanJian.x = e.yuanJian.yuanJianX;
@@ -99,7 +106,6 @@ package view {
 					yuanJian.offsetX = 0;
 					this._yuanJianQu.addYuanJian(yuanJian);
 					
-					
 				}
 				e.yuanJian.topYuanJian = null;
 				yuanJian.bottomYuanJian = null;
@@ -111,7 +117,7 @@ package view {
 					yuanJian.y = yuanJian.yuanJianY;
 					yuanJian.guiDao = null;
 					yuanJian.offsetX = 0;
-					this._yuanJianQu.addYuanJian(yuanJian);	
+					this._yuanJianQu.addYuanJian(yuanJian);
 				}
 				e.yuanJian.bottomYuanJian = null;
 				yuanJian.topYuanJian = null;
@@ -119,9 +125,16 @@ package view {
 		}
 		
 		private function _onStartToDragYuanJian(e:LayoutEvent):void {
-			const yuanJian:YuanJian = e.yuanJian;
-			_dragingBitmap.yuanJian = yuanJian;
-			//const p:Point = _yuanJianQu.localToGlobal(new Point(yuanJian.x, yuanJian.y));
+			//const yuanJian:YuanJian = e.yuanJian;
+			//_dragingBitmap.yuanJian = yuanJian;
+			////const p:Point = _yuanJianQu.localToGlobal(new Point(yuanJian.x, yuanJian.y));
+			//const p:Point = new Point(mouseX, mouseY);
+			//_dragingBitmap.x = p.x;
+			//_dragingBitmap.y = p.y;
+			//_isDraging = true;
+			//this.mouseChildren = false;
+			
+			_dragingBitmap.yuanJianArr = e.yuanJianArr;
 			const p:Point = new Point(mouseX, mouseY);
 			_dragingBitmap.x = p.x;
 			_dragingBitmap.y = p.y;
@@ -198,11 +211,11 @@ package view {
 				}
 				if (b) {
 					if (_dragingBitmap.subType == Enum.V_XIAN_CAO) {
-						_buJuQu.addXianCao(DragingBitmap.V_XIAN_CAO_W, DragingBitmap.V_XIAN_CAO_H, e.stageX, e.stageY);
+						_buJuQu.addXianCao(DragingBitmap.V_XIAN_CAO_W, DragingBitmap.V_XIAN_CAO_H, e.stageX, e.stageY, Enum.V, null, '', true);
 					} else if (_dragingBitmap.subType == Enum.H_XIAN_CAO) {
-						_buJuQu.addXianCao(DragingBitmap.H_XIAN_CAO_W, DragingBitmap.H_XIAN_CAO_H, e.stageX, e.stageY);
+						_buJuQu.addXianCao(DragingBitmap.H_XIAN_CAO_W, DragingBitmap.H_XIAN_CAO_H, e.stageX, e.stageY, Enum.H, null, '', true);
 					} else if (_dragingBitmap.subType == Enum.GUI_DAO) {
-						_buJuQu.addGuiDao(false, DragingBitmap.GUI_DAO_W, DragingBitmap.GUI_DAO_H, e.stageX, e.stageY);
+						_buJuQu.addGuiDao(false, DragingBitmap.GUI_DAO_W, DragingBitmap.GUI_DAO_H, e.stageX, e.stageY, null, '', true);
 					} else if (_dragingBitmap.subType == Enum.KA_KOU) {
 						var p:Point = new Point(e.stageX, e.stageY);
 						var guiDao:GuiDao = null;
@@ -217,32 +230,38 @@ package view {
 							guiDao.addKaKou(guiDao.globalToLocal(p));
 						}
 					} else if (_dragingBitmap.subType == Enum.JIA_GUI_DAO) {
-						_buJuQu.addGuiDao(true, DragingBitmap.GUI_DAO_W, DragingBitmap.GUI_DAO_H, e.stageX, e.stageY);
+						_buJuQu.addGuiDao(true, DragingBitmap.GUI_DAO_W, DragingBitmap.GUI_DAO_H, e.stageX, e.stageY, null, '', true);
 					} else {
 						// 首先判断鼠标点上下10px范围内是否有元件，有的话，就吸附在该元件上
 						var targetYuanJian:YuanJian = null;
-						p = new Point(e.stageX, e.stageY);
-						p.y -= 10;
-						var cellArr:Array = getObjectsUnderPoint(p);
-						for (i = cellArr.length - 1; i > -1; i--) {
-							if (cellArr[i] is YuanJian) {
-								targetYuanJian = cellArr[i] as YuanJian;
-								break;
-							}
-						}
-						if (targetYuanJian && !targetYuanJian.isKaKou && targetYuanJian.isOnGuiDao && targetYuanJian.bottomYuanJian == null) {
-							targetYuanJian.bottomYuanJian = _dragingBitmap.yuanJian;
-						} else {
-							p.y += 20;
-							cellArr = getObjectsUnderPoint(p);
+						if (_dragingBitmap.yuanJianArr.length == 1) {
+							p = new Point(e.stageX, e.stageY);
+							p.y -= 10;
+							var cellArr:Array = getObjectsUnderPoint(p);
 							for (i = cellArr.length - 1; i > -1; i--) {
 								if (cellArr[i] is YuanJian) {
 									targetYuanJian = cellArr[i] as YuanJian;
 									break;
 								}
 							}
-							if (targetYuanJian && !targetYuanJian.isKaKou &&  targetYuanJian.isOnGuiDao && targetYuanJian.topYuanJian == null) {
-								targetYuanJian.topYuanJian = _dragingBitmap.yuanJian;
+						}
+						if (targetYuanJian && !targetYuanJian.isKaKou && targetYuanJian.isOnGuiDao && targetYuanJian.bottomYuanJian == null) {
+							_buJuQu.deleteYuanJian(_dragingBitmap.yuanJianArr[0]);
+							targetYuanJian.bottomYuanJian = _dragingBitmap.yuanJianArr[0];
+						} else {
+							if (_dragingBitmap.yuanJianArr.length == 1) {
+								p.y += 20;
+								cellArr = getObjectsUnderPoint(p);
+								for (i = cellArr.length - 1; i > -1; i--) {
+									if (cellArr[i] is YuanJian) {
+										targetYuanJian = cellArr[i] as YuanJian;
+										break;
+									}
+								}
+							}
+							if (targetYuanJian && !targetYuanJian.isKaKou && targetYuanJian.isOnGuiDao && targetYuanJian.topYuanJian == null) {
+								_buJuQu.deleteYuanJian(_dragingBitmap.yuanJianArr[0]);
+								targetYuanJian.topYuanJian = _dragingBitmap.yuanJianArr[0];
 							} else {
 								// 再判断是否能放到轨道上
 								p.y -= 10;
@@ -255,7 +274,10 @@ package view {
 									}
 								}
 								if (guiDao) {
-									guiDao.addYuanJian(_dragingBitmap.yuanJian, guiDao.globalToLocal(p));
+									for (i = 0; i < _dragingBitmap.yuanJianArr.length; i++ ){
+										_buJuQu.deleteYuanJian(_dragingBitmap.yuanJianArr[i]);
+									}
+									guiDao.addYuanJian(_dragingBitmap.yuanJianArr, guiDao.globalToLocal(p));
 								}
 							}
 						}

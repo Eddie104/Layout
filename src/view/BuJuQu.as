@@ -4,7 +4,12 @@ package view {
 	import flash.display.Graphics;
 	import flash.display.Shape;
 	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.external.ExternalInterface;
+	import flash.geom.Point;
+	import flash.ui.Keyboard;
 	import model.Cell;
 	import model.GuiDao;
 	import model.KaKou;
@@ -36,6 +41,22 @@ package view {
 		private var _viewWidth:int;
 		
 		private var _viewHeight:int;
+		
+		private var _isDraging:Boolean;
+		
+		private var _dragingLastX:int;
+		
+		private var _dragingLastY:int;
+		
+		private var _numXianCao:int;
+		
+		private var _numGuiDao:int;
+		
+		private var _minScale:Number;
+		
+		private var _keyPool:KeyPoll;
+		
+		private var _copyedCell:Cell;
 		
 		public function BuJuQu(width:int, height:int) {
 			super();
@@ -77,25 +98,38 @@ package view {
 			
 			this.addEventListener(MouseEvent.MOUSE_MOVE, _onMouseMoved);
 			this.addEventListener(MouseEvent.MOUSE_UP, _onMouseUp);
+			this.addEventListener(MouseEvent.MOUSE_DOWN, _onMouseDown);
 			this.addEventListener(MouseEvent.CLICK, _onBuJuClicked);
 			
 			ScaleLine.instance.addEventListener(LayoutEvent.COPY, _onCopy);
 			ScaleLine.instance.addEventListener(LayoutEvent.DELETE, _onDelete);
+			
+			if (ExternalInterface.available) {
+				ExternalInterface.addCallback('autoScale', this.autoScale);
+			}
 		}
 		
-		public function addGuiDao(isJiaDe:Boolean, w:int = 50, h:int = 40, x:int = 0, y:int = 0, name:String = null):void {
-			x = x / _container.scaleX;
-			y = y / _container.scaleY;
-			var guiDao:GuiDao = new GuiDao(isJiaDe ? _w : w, isJiaDe ? 10 : h, Enum.H, isJiaDe);
-			guiDao.x = isJiaDe ? 0 : x;
+		public function addGuiDao(isJiaDe:Boolean, w:int = 50, h:int = 40, x:int = 0, y:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false):void {
+			if (!isCopy) {
+				if (isDrag) {
+					x = (x - _container.x) / _container.scaleX;
+					y = (y - _container.y) / _container.scaleY;
+				} else {
+					x = x / _container.scaleX;
+					y = y / _container.scaleY;
+				}
+			}
+			var guiDao:GuiDao = new GuiDao(isJiaDe ? _w - 20 * 2 : w, isJiaDe ? 10 : h, Enum.H, isJiaDe);
+			guiDao.x = isJiaDe ? 20 : x;
 			guiDao.y = y;
+			guiDao.typeStr = type;
 			if (name) {
 				guiDao.name = name;
-				_guiDaoContainer.addChildAt(guiDao, int(name) - 1);
+				_numGuiDao = int(name);
 			} else {
-				_guiDaoContainer.addChild(guiDao);
-				guiDao.name = _guiDaoContainer.numChildren.toString();
+				guiDao.name = (++_numGuiDao).toString();
 			}
+			_guiDaoContainer.addChild(guiDao);
 			guiDao.addEventListener(MouseEvent.CLICK, _onCellClicked);
 			guiDao.addEventListener(LayoutEvent.SHOW_YUAN_JIAN_SHU_XING, _onShowYuanJianShuXing);
 			guiDao.addEventListener(LayoutEvent.DELETE, _onDeleteYuanJian);
@@ -112,19 +146,29 @@ package view {
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.ADD_GUI_DAO));
 		}
 		
-		public function addXianCao(w:int = 200, h:int = 80, x:int = 0, y:int = 0, name:String = null):void {
-			x = x / _container.scaleX;
-			y = y / _container.scaleY;
+		public function addXianCao(w:int = 200, h:int = 80, x:int = 0, y:int = 0, dir:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false):void {
+			if (!isCopy) {
+				if (isDrag) {
+					x = (x - _container.x) / _container.scaleX;
+					y = (y - _container.y) / _container.scaleY;
+				} else {
+					x = x / _container.scaleX;
+					y = y / _container.scaleY;
+				}
+			}
+			
 			var xianCao:XianCao = new XianCao(w, h, Enum.H);
 			xianCao.x = x;
 			xianCao.y = y;
+			xianCao.typeStr = type;
+			xianCao.dir = dir;
 			if (name) {
 				xianCao.name = name;
-				_xianCaoContainer.addChildAt(xianCao, int(name) - 1);
+				_numXianCao = int(name);
 			} else {
-				_xianCaoContainer.addChild(xianCao);
-				xianCao.name = _xianCaoContainer.numChildren.toString();
+				xianCao.name = (++_numXianCao).toString();
 			}
+			_xianCaoContainer.addChild(xianCao);
 			xianCao.addEventListener(MouseEvent.CLICK, _onCellClicked);
 			
 			ScaleLine.instance.parentCell = xianCao;
@@ -171,28 +215,34 @@ package view {
 		
 		public function initLayout(xml:XML, layoutXML:XML):void {
 			var guiDao:GuiDao, yuanJian:YuanJian;
-			for each (var item:* in layoutXML.items.item) {
-				for (var i:int = 0; i < _guiDaoContainer.numChildren; i++) {
-					guiDao = _guiDaoContainer.getChildAt(i) as GuiDao;
-					if (guiDao.name == item.@pathway) {
-						if (item.@name == 'kaKou'){
-							yuanJian = new KaKou(item.@w, item.@h);
-						} else {
-							yuanJian = YuanJianManager.instance.getYuanJian(item.@name);
+			if (layoutXML) {
+				for each (var item:* in layoutXML.items.item) {
+					for (var i:int = 0; i < _guiDaoContainer.numChildren; i++) {
+						guiDao = _guiDaoContainer.getChildAt(i) as GuiDao;
+						if (guiDao.name == item.@pathway) {
+							if (item.@name == 'kaKou') {
+								yuanJian = new KaKou(item.@w, item.@h, item.@type);
+							} else {
+								yuanJian = YuanJianManager.instance.getYuanJian(item.@name);
+							}
+							
+							guiDao.initYuanJian(yuanJian, item.@x, item.@y);
+							if (item.@topItem) {
+								yuanJian.topYuanJian = YuanJianManager.instance.getYuanJian(item.@topItem);
+							}
+							if (item.@bottomItem) {
+								yuanJian.bottomYuanJian = YuanJianManager.instance.getYuanJian(item.@bottomItem);
+							}
+							break;
 						}
-						
-						guiDao.initYuanJian(yuanJian, item.@x, item.@y);
-						if (item.@topItem) {
-							yuanJian.topYuanJian = YuanJianManager.instance.getYuanJian(item.@topItem);
-						}
-						if (item.@bottomItem) {
-							yuanJian.bottomYuanJian = YuanJianManager.instance.getYuanJian(item.@bottomItem);
-						}
-						break;
 					}
 				}
 			}
 		}
+		
+		//public function removeUnusefulYuanJian(name:String):void {
+		//
+		//}
 		
 		private function _onDeleteYuanJian(e:LayoutEvent):void {
 			if (e.yuanJian == ScaleLine.instance.parentCell) {
@@ -202,7 +252,7 @@ package view {
 			dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, e.yuanJian));
 		}
 		
-		private function _onDelete(e:LayoutEvent):void {
+		private function _onDelete(evt:LayoutEvent = null):void {
 			if (_selectedCell) {
 				if (_selectedCell is GuiDao) {
 					const guiDao:GuiDao = _selectedCell as GuiDao;
@@ -220,21 +270,38 @@ package view {
 					_xianCaoContainer.removeChild(_selectedCell);
 					_selectedCell.removeEventListener(MouseEvent.CLICK, _onCellClicked);
 				} else if (_selectedCell is YuanJian) {
-					(_selectedCell.parent as GuiDao).removeYuanJian(_selectedCell as YuanJian);
-					dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, _selectedCell as YuanJian));
+					deleteYuanJian(_selectedCell as YuanJian);
+					//(_selectedCell.parent as GuiDao).removeYuanJian(_selectedCell as YuanJian);
+					//dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, _selectedCell as YuanJian));
 				}
 				ScaleLine.instance.parentCell = null;
 				_selectedCell = null;
 			}
 		}
 		
-		private function _onCopy(e:LayoutEvent):void {
-			if (_selectedCell) {
-				if (_selectedCell is GuiDao) {
-					addGuiDao(false, _selectedCell.reallyWidth, _selectedCell.reallyHeight, _selectedCell.x + 10, _selectedCell.y + 10);
-				} else if (_selectedCell is XianCao) {
-					addXianCao(_selectedCell.reallyWidth, _selectedCell.reallyHeight, _selectedCell.x + 10, _selectedCell.y + 10);
+		public function deleteYuanJian(yuanJian:YuanJian):void {
+			if (yuanJian.parent is GuiDao){
+				(yuanJian.parent as GuiDao).removeYuanJian(yuanJian);
+				dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, yuanJian));
+				if (ScaleLine.instance.parentCell == yuanJian) {
+					ScaleLine.instance.parentCell = null;
+					_selectedCell = null;
 				}
+			}
+		}
+		
+		private function _onCopy(e:LayoutEvent = null):void {
+			var cell:Cell = e ? _selectedCell : _copyedCell;
+			if (cell) {
+				const offset:Number = 10;
+				if (cell is GuiDao) {
+					addGuiDao(false, cell.reallyWidth, cell.reallyHeight, cell.x + offset, cell.y + offset, null, '', false, true);
+				} else if (cell is XianCao) {
+					addXianCao(cell.reallyWidth, cell.reallyHeight, cell.x + offset, cell.y + offset, (cell as XianCao).dir, null, '', false, true);
+				}
+			}
+			if (!e) {
+				new Alert("粘贴成功!").show(this.stage);
 			}
 		}
 		
@@ -242,11 +309,11 @@ package view {
 			_container.scaleX = 1;
 			_container.scaleY = 1;
 			containerScale = 1;
-			for (var i:int = 0; i < _xianCaoContainer.numChildren; i++ ){
+			for (var i:int = 0; i < _xianCaoContainer.numChildren; i++) {
 				_xianCaoContainer.getChildAt(i).removeEventListener(MouseEvent.CLICK, _onCellClicked);
 			}
 			this._xianCaoContainer.removeChildren();
-			for (i = 0; i < _guiDaoContainer.numChildren; i++ ){
+			for (i = 0; i < _guiDaoContainer.numChildren; i++) {
 				_guiDaoContainer.getChildAt(i).removeEventListener(MouseEvent.CLICK, _onCellClicked);
 				_guiDaoContainer.getChildAt(i).removeEventListener(LayoutEvent.SHOW_YUAN_JIAN_SHU_XING, _onShowYuanJianShuXing);
 				_guiDaoContainer.getChildAt(i).removeEventListener(LayoutEvent.DELETE, _onDeleteYuanJian);
@@ -265,16 +332,16 @@ package view {
 			const layoutXML:XML = evt.layoutXML;
 			if (layoutXML) {
 				for each (var item:* in layoutXML.layout.trunking) {
-					this.addXianCao(item.@w, item.@h, item.@x, item.@y, item.@name);
+					this.addXianCao(item.@w, item.@h, item.@x, item.@y, item.@dir, item.@name, item.@type);
 				}
 				for each (item in layoutXML.layout.pathway) {
-					this.addGuiDao(item.@virtual == 'true', item.@w, item.@h, item.@x, item.@y, item.@name);
+					this.addGuiDao(item.@virtual == 'true', item.@w, item.@h, item.@x, item.@y, item.@name, item.@type);
 				}
 			} else {
-				this.addXianCao(_w, 20);
-				this.addXianCao(20, _h, _w - 20);
-				this.addXianCao(_w, 20, 0, _h - 20);
-				this.addXianCao(20, _h);
+				this.addXianCao(_w, 20, 0, 0, Enum.H);
+				this.addXianCao(20, _h, _w - 20, 0, Enum.V);
+				this.addXianCao(_w, 20, 0, _h - 20, Enum.H);
+				this.addXianCao(20, _h, 0, 0, Enum.V);
 			}
 			
 			var scale:Number = _viewWidth / _w;
@@ -285,6 +352,40 @@ package view {
 			_container.scaleX = scale;
 			_container.scaleY = scale;
 			containerScale = scale;
+			
+			if (_h > _w) {
+				this._minScale = _viewHeight / _h;
+			} else {
+				this._minScale = _viewWidth / _w;
+			}
+			
+			if (!this._keyPool) {
+				this._keyPool = new KeyPoll(Main.mainScene.stage);
+				this._keyPool.addEventListener(KeyboardEvent.KEY_UP, _onKeyUp);
+			}
+		}
+		
+		private function _onKeyUp(e:KeyboardEvent):void {
+			if (e.keyCode == Keyboard.DELETE) {
+				this._onDelete();
+			} else if (e.keyCode == Keyboard.C) {
+				if (this._selectedCell) {
+					if (_selectedCell is XianCao || _selectedCell is GuiDao) {
+						_copyedCell = _selectedCell;
+						new Alert("复制成功!").show(this.stage);
+					}
+				}
+			} else if (e.keyCode == Keyboard.V) {
+				_onCopy();
+			} else if (e.keyCode == Keyboard.W || e.keyCode == Keyboard.UP) {
+				ScaleLine.instance.moveUp();
+			} else if (e.keyCode == Keyboard.D || e.keyCode == Keyboard.RIGHT) {
+				ScaleLine.instance.moveRight();
+			} else if (e.keyCode == Keyboard.S || e.keyCode == Keyboard.DOWN) {
+				ScaleLine.instance.moveDown();
+			} else if (e.keyCode == Keyboard.A || e.keyCode == Keyboard.LEFT) {
+				ScaleLine.instance.moveLeft();
+			}
 		}
 		
 		private function _onShowYuanJianShuXing(e:LayoutEvent):void {
@@ -326,6 +427,36 @@ package view {
 			_selectedCell.isSelected = true;
 			ScaleLine.instance.parentCell = _selectedCell;
 			
+			// 如果是元件，还要找到距离最近的水平线槽的边距
+			if (_selectedCell is YuanJian) {
+				var yuanJian:YuanJian = _selectedCell as YuanJian;
+				//trace(_container.globalToLocal(yuanJian.guiDao.localToGlobal(new Point(yuanJian.x, yuanJian.y))));
+				var yuanJianGlobalY:int = _container.globalToLocal(yuanJian.guiDao.localToGlobal(new Point(yuanJian.x, yuanJian.y))).y;
+				var marginTop:int = int.MAX_VALUE;
+				var marginBottom:int = int.MAX_VALUE;
+				var topXianCao:XianCao;
+				var bottomXianCao:XianCao;
+				var xianCao:XianCao;
+				for (var i:int = 0; i < this._xianCaoContainer.numChildren; i++) {
+					xianCao = _xianCaoContainer.getChildAt(i) as XianCao;
+					if (xianCao.dir == Enum.H) {
+						if (xianCao.y > yuanJianGlobalY) {
+							if (xianCao.y - yuanJianGlobalY < marginBottom) {
+								marginBottom = xianCao.y - yuanJianGlobalY;
+								bottomXianCao = xianCao;
+							}
+						} else {
+							if (yuanJianGlobalY - xianCao.y < marginTop) {
+								marginTop = yuanJianGlobalY - xianCao.y;
+								topXianCao = xianCao;
+							}
+						}
+					}
+				}
+				yuanJian.marginTopToXianCao = yuanJianGlobalY - (topXianCao.y + topXianCao.reallyHeight);
+				yuanJian.marginBottomToXianCao = bottomXianCao.y - (yuanJianGlobalY + yuanJian.reallyHeight);
+			}
+			
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.SELECTED_ARR_CHANGED));
 		}
 		
@@ -337,35 +468,84 @@ package view {
 		//}
 		
 		private function _onMouseWheel(evt:MouseEvent):void {
+			const lastScale:Number = _container.scaleX;
 			if (evt.delta < 0) {
 				//向下滚动
-				if (_container.scaleX > .2) {
+				if (_container.scaleX > _minScale) {
 					_container.scaleX -= .05;
 					_container.scaleY -= .05;
 					containerScale = _container.scaleX;
+				} else {
+					_container.scaleX = _minScale;
+					_container.scaleY = _minScale;
+					containerScale = _container.scaleX;
 				}
 			} else {
-				if (_container.scaleX < 1) {
+				if (_container.scaleX < 2) {
 					_container.scaleX += .05;
 					_container.scaleY += .05;
-					if (_container.scaleX > 1) {
-						_container.scaleX = 1;
+					if (_container.scaleX > 2) {
+						_container.scaleX = 2;
 					}
-					if (_container.scaleY > 1) {
-						_container.scaleY = 1;
+					if (_container.scaleY > 2) {
+						_container.scaleY = 2;
 					}
 					containerScale = _container.scaleX;
 				}
 			}
+			
+			const p:Point = _container.globalToLocal(new Point(mouseX, mouseY));
+			_container.x += (p.x - 0) * (lastScale - _container.scaleX);
+			_container.y += (p.y - 0) * (lastScale - _container.scaleX);
+			//if (_container.scaleX == 1 && _container.scaleY == 1) {
+			//// do nothing
+			//} else {
+			//_container.x = p.x * (1 - _container.scaleX);
+			//_container.y = p.y * (1 - _container.scaleY);
+			//}
+		
+			//_container.x = _viewWidth / 2 * (1 - _container.scaleX);
+			//_container.y = _viewHeight / 2 * (1 - _container.scaleY);
+		
+			//map_mc.x=mouseX-e.localX*(map_mc.scaleX);
+			//map_mc.y=mouseY-e.localY*(map_mc.scaleY);
 		}
 		
 		private function _onMouseUp(evt:MouseEvent):void {
 			ScaleLine.instance.mouseUped();
+			this._isDraging = false;
+		}
+		
+		private function _onMouseDown(e:MouseEvent):void {
+			if (e.target == _container) {
+				this._isDraging = true;
+				_dragingLastX = e.stageX;
+				_dragingLastY = e.stageY;
+			}
 		}
 		
 		private function _onMouseMoved(evt:MouseEvent):void {
 			if (evt.buttonDown) {
-				ScaleLine.instance.mouseMoved(evt.stageX, evt.stageY);
+				var isOnContainer:Boolean = false;
+				var arr:Array = this.getObjectsUnderPoint(new Point(evt.stageX, evt.stageY));
+				for (var i:int = 0; i < arr.length; i++) {
+					if (arr[i] == _container) {
+						isOnContainer = true;
+						break;
+					}
+				}
+				if (isOnContainer && !ScaleLine.instance.mouseMoved(evt.stageX, evt.stageY)) {
+					if (_isDraging) {
+						//_container.x += evt.stageX - _dragingLastX;
+						//_container.y += evt.stageY - _dragingLastY;
+						//_dragingLastX = evt.stageX;
+						//_dragingLastY = evt.stageY;
+						_container.x += mouseX - _dragingLastX;
+						_container.y += mouseY - _dragingLastY;
+						_dragingLastX = mouseX;
+						_dragingLastY = mouseY;
+					}
+				}
 			}
 		}
 		
@@ -379,6 +559,23 @@ package view {
 		
 		public function get selectedCell():Cell {
 			return _selectedCell;
+		}
+		
+		public function get w():int {
+			return _w;
+		}
+		
+		public function get h():int {
+			return _h;
+		}
+		
+		private function autoScale():void {
+			const scale:Number = _h > _w ? _viewHeight / _h : _viewWidth / _w;
+			this._container.scaleX = scale;
+			this._container.scaleY = scale;
+			containerScale = scale;
+			_container.x = 0;
+			_container.y = 0;
 		}
 	}
 

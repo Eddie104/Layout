@@ -1,6 +1,8 @@
 package view {
+	import adobe.utils.CustomActions;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import model.YuanJian;
 	
@@ -26,7 +28,9 @@ package view {
 		
 		public static const KA_KOU_H:int = 30;
 		
-		private var _yuanJian:YuanJian;
+		//private var _yuanJian:YuanJian;
+		
+		private var _yuanJianArr:Vector.<YuanJian>;
 		
 		/**
 		 * 0是垂直的线槽
@@ -50,20 +54,20 @@ package view {
 			super();
 		}
 		
-		public function get yuanJian():YuanJian {
-			return _yuanJian;
-		}
-		
-		public function set yuanJian(value:YuanJian):void {
-			subType = -1;
-			_yuanJian = value;
-			if (this.bitmapData) {
-				this.bitmapData.dispose();
-				this.bitmapData = null;
-			}
-			this.bitmapData = new BitmapData(_yuanJian.reallyWidth, _yuanJian.reallyHeight, true, 0);
-			this.bitmapData.draw(_yuanJian);
-		}
+		//public function get yuanJian():YuanJian {
+		//return _yuanJian;
+		//}
+		//
+		//public function set yuanJian(value:YuanJian):void {
+		//subType = -1;
+		//_yuanJian = value;
+		//if (this.bitmapData) {
+		//this.bitmapData.dispose();
+		//this.bitmapData = null;
+		//}
+		//this.bitmapData = new BitmapData(_yuanJian.reallyWidth, _yuanJian.reallyHeight, true, 0);
+		//this.bitmapData.draw(_yuanJian);
+		//}
 		
 		public function get subType():int {
 			return _subType;
@@ -91,6 +95,53 @@ package view {
 				this.bitmapData = new BitmapData(100, 20, true, 0);
 				this.bitmapData.draw(_createJiaGuiDao());
 			}
+		}
+		
+		public function get yuanJianArr():Vector.<YuanJian> {
+			return _yuanJianArr;
+		}
+		
+		public function set yuanJianArr(value:Vector.<YuanJian>):void {
+			subType = -1;
+			_yuanJianArr = value;
+			if (this.bitmapData) {
+				this.bitmapData.dispose();
+				this.bitmapData = null;
+			}
+			const tmpSprite:Sprite = new Sprite();
+			var oldParent:Vector.<DisplayObjectContainer> = new Vector.<DisplayObjectContainer>(), oldX:Vector.<Number> = new Vector.<Number>(), oldY:Vector.<Number> = new Vector.<Number>();
+			var oldIsSelected:Vector.<Boolean> = new Vector.<Boolean>();
+			var w:int = 0, h:int = 0;
+			var yuanJian:YuanJian;
+			ScaleLine.instance.visible = false;
+			for (var i:int = 0; i < value.length; i++) {
+				yuanJian = value[i];
+				yuanJian.isSelected = false;
+				
+				oldParent[i] = yuanJian.parent;
+				oldX[i] = yuanJian.x;
+				oldY[i] = yuanJian.y;
+				oldIsSelected[i] = yuanJian.isSelected;
+				yuanJian.isSelected = false;
+				yuanJian.parent.removeChild(yuanJian);
+				yuanJian.x = w;
+				yuanJian.y = 0;
+				tmpSprite.addChild(yuanJian);
+				
+				
+				w += yuanJian.reallyWidth;
+				h = yuanJian.reallyHeight > h ? yuanJian.reallyHeight : h;
+			}
+			this.bitmapData = new BitmapData(w, h, true, 0);
+			this.bitmapData.draw(tmpSprite);
+			for (i = 0; i < value.length; i++) {
+				yuanJian = value[i];
+				yuanJian.x = oldX[i];
+				yuanJian.y = oldY[i];
+				yuanJian.isSelected = oldIsSelected[i];
+				oldParent[i].addChild(yuanJian);
+			}
+			ScaleLine.instance.visible = true;
 		}
 		
 		private function _createVXianCao():Sprite {

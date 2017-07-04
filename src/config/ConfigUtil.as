@@ -19,6 +19,8 @@ package config {
 		
 		private var _layoutXML:XML;
 		
+		private var _layoutName:String = '';
+		
 		public function ConfigUtil() {
 		
 		}
@@ -44,9 +46,9 @@ package config {
 				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name));
 			}
 			
-			const layoutXmlName:String = _xml.layout.@name;
-			if (layoutXmlName) {
-				loadurl.load(new URLRequest(layoutXmlName + '.xml'));
+			_layoutName = _xml.layout.@name;
+			if (_layoutName) {
+				loadurl.load(new URLRequest(_layoutName + '.xml'));
 				loadurl.addEventListener(Event.COMPLETE, _loadLayoutxml);
 			} else {
 				this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML_OK, _xml));
@@ -57,6 +59,15 @@ package config {
 			var loadurl:URLLoader = e.currentTarget as URLLoader;
 			loadurl.removeEventListener(Event.COMPLETE, _loadLayoutxml);
 			_layoutXML = XML(loadurl.data);
+			
+			for each (var item:* in _layoutXML.items.item) {
+				if (item.@name != 'kaKou') {
+					if (!YuanJianManager.instance.getYuanJian(item.@name)) {
+						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name));
+					}
+				}
+			}
+			
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.IMPORT_XML_OK, _xml, null, false, null, _layoutXML));
 		}
 		
@@ -65,6 +76,22 @@ package config {
 				ConfigUtil._instance = new ConfigUtil();
 			}
 			return ConfigUtil._instance;
+		}
+		
+		public function get layoutName():String {
+			return _layoutName;
+		}
+		
+		public function set layoutName(value:String):void {
+			_layoutName = value;
+		}
+		
+		public function get xml():XML {
+			return _xml;
+		}
+		
+		public function get layoutXML():XML {
+			return _layoutXML;
 		}
 	
 	}

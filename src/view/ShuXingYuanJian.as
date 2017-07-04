@@ -12,6 +12,10 @@ package view {
 	 */
 	public class ShuXingYuanJian extends ShuXing {
 		
+		protected var _marginTopTF:TextField;
+		
+		protected var _margionBottomTF:TextField;
+		
 		public function ShuXingYuanJian(width:int, height:int, type:String = '元件') {
 			super(width, height, type);
 		}
@@ -37,12 +41,61 @@ package view {
 			_xTF.y = label.y;
 			_xTF.addEventListener(Event.CHANGE, _onXChanged);
 			addChild(_xTF);
+			
+			label = new TextField();
+			label.mouseEnabled = false;
+			label.text = '上轨:';
+			label.x = 100;
+			label.y = (height - label.textHeight) >> 1;
+			addChild(label);
+			
+			border = _drawInputBorder(50, 18);
+			border.x = 40;
+			border.y = label.y;
+			addChild(border);
+			_marginTopTF = new TextField();
+			_marginTopTF.mouseEnabled = false;
+			//_marginTopTF.type = TextFieldType.INPUT;
+			_marginTopTF.text = '0';
+			_marginTopTF.width = 50;
+			_marginTopTF.height = 18;
+			_marginTopTF.restrict = '0-9';
+			_marginTopTF.x = 140;
+			_marginTopTF.y = label.y;
+			//_marginTopTF.addEventListener(Event.CHANGE, _onXChanged);
+			addChild(_marginTopTF);
+			
+			label = new TextField();
+			label.mouseEnabled = false;
+			label.text = '下轨:';
+			label.x = 200;
+			label.y = (height - label.textHeight) >> 1;
+			addChild(label);
+			
+			border = _drawInputBorder(50, 18);
+			border.x = 40;
+			border.y = label.y;
+			addChild(border);
+			_margionBottomTF = new TextField();
+			_margionBottomTF.mouseEnabled = false;
+			//_margionBottomTF.type = TextFieldType.INPUT;
+			_margionBottomTF.text = '0';
+			_margionBottomTF.width = 50;
+			_margionBottomTF.height = 18;
+			_margionBottomTF.restrict = '0-9';
+			_margionBottomTF.x = 240;
+			_margionBottomTF.y = label.y;
+			//_margionBottomTF.addEventListener(Event.CHANGE, _onXChanged);
+			addChild(_margionBottomTF);
 		}
 		
 		override public function setCurCell(cell:Cell):void {
 			_curCell = cell;
 			if (cell) {
-				this._xTF.text = (cell as YuanJian).offsetX.toString();
+				var yuanJian:YuanJian = cell as YuanJian;
+				this._xTF.text = yuanJian.offsetX.toString();
+				_marginTopTF.text = yuanJian.marginTopToXianCao.toString();
+				_margionBottomTF.text = yuanJian.marginBottomToXianCao.toString();
 			}
 		}
 		

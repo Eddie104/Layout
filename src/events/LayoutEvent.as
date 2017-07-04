@@ -55,13 +55,16 @@ package events {
 		
 		private var _layoutXML:XML;
 		
-		public function LayoutEvent(type:String, xml:XML = null, yuanJian:YuanJian = null, isCtrlKey:Boolean = false, cell:Cell = null, layoutXML:XML = null) {
+		private var _yuanJianArr:Vector.<YuanJian>;
+		
+		public function LayoutEvent(type:String, xml:XML = null, yuanJian:YuanJian = null, isCtrlKey:Boolean = false, cell:Cell = null, layoutXML:XML = null, yuanJianArr:Vector.<YuanJian> = null) {
 			super(type);
 			_xml = xml;
 			_yuanJian = yuanJian;
 			_isCtrlKey = isCtrlKey;
 			_cell = cell;
 			_layoutXML = layoutXML;
+			_yuanJianArr = yuanJianArr;
 		}
 		
 		public function get xml():XML{
@@ -84,8 +87,12 @@ package events {
 			return _layoutXML;
 		}
 		
+		public function get yuanJianArr():Vector.<YuanJian> {
+			return _yuanJianArr;
+		}
+		
 		public override function clone():Event {
-			return new LayoutEvent(type, _xml, _yuanJian, _isCtrlKey, _cell, _layoutXML);
+			return new LayoutEvent(type, _xml, _yuanJian, _isCtrlKey, _cell, _layoutXML, _yuanJianArr);
 		}
 		
 		public override function toString():String {

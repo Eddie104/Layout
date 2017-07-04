@@ -23,6 +23,10 @@ package model {
 		
 		protected var _isKaKou:Boolean;
 		
+		protected var _marginTopToXianCao:int;
+		
+		protected var _marginBottomToXianCao:int;
+		
 		public function YuanJian(width:int, height:int, color:int, name:String) {
 			super(width, height, color);
 			this.name = name;
@@ -100,6 +104,22 @@ package model {
 			return _isKaKou;
 		}
 		
+		public function get marginTopToXianCao():int {
+			return _marginTopToXianCao;
+		}
+		
+		public function set marginTopToXianCao(value:int):void {
+			_marginTopToXianCao = value;
+		}
+		
+		public function get marginBottomToXianCao():int {
+			return _marginBottomToXianCao;
+		}
+		
+		public function set marginBottomToXianCao(value:int):void {
+			_marginBottomToXianCao = value;
+		}
+		
 		override public function toXML():String {
 			//if (this.topYuanJian && !this.bottomYuanJian) {
 				//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<topItem name="' + topYuanJian.name + '" />\n\t\t</item>';
@@ -111,13 +131,13 @@ package model {
 			//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
 			
 			if (this.topYuanJian && !this.bottomYuanJian) {
-				return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" />';
+				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" />';
 			} else if (!this.topYuanJian && this.bottomYuanJian) {
-				return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" bottomItem="' + bottomYuanJian.name + '" />';
+				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" bottomItem="' + bottomYuanJian.name + '" />';
 			} else if (this.topYuanJian && this.bottomYuanJian) {
-				return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" bottomItem="' + bottomYuanJian.name + '" />';
+				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" bottomItem="' + bottomYuanJian.name + '" />';
 			}
-			return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
+			return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
 		}
 	
 	}

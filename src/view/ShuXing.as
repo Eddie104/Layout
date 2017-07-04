@@ -103,7 +103,7 @@ package view {
 			
 			label = new TextField();
 			label.mouseEnabled = false;
-			label.text = '高度:';
+			label.text = '长度:';
 			label.x = 300;
 			label.y = (height - label.textHeight) >> 1;
 			addChild(label);

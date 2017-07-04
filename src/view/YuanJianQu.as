@@ -15,13 +15,15 @@ package view {
 	 */
 	public final class YuanJianQu extends Sprite {
 		
-		private var _yuanJianArr:Vector.<YuanJian> = new Vector.<YuanJian>();
-		
 		private var _w:int;
 		
 		private var _h:int;
 		
 		private var _yuanJianContainer:Sprite;
+		
+		private var _yuanJianSelected:Vector.<YuanJian> = new Vector.<YuanJian>();
+		
+		private var _startCheckMoved:Boolean;
 		
 		public function YuanJianQu(width:int, height:int) {
 			super();
@@ -54,38 +56,40 @@ package view {
 			addChild(mask);
 			_yuanJianContainer.mask = mask;
 			
-			var btn:Sprite = createBtn('垂直线槽', 0x5b9bd5);
-			btn.y = ((60 - 30) >> 1) + height - 60;
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragVXianCao);
-			addChild(btn);
-			
-			btn = createBtn('水平线槽', 0x5b9bd5);
-			btn.x = 70;
-			btn.y = ((60 - 30) >> 1) + height - 60;
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragHXianCao);
-			addChild(btn);
-			
-			btn = createBtn('轨道', 0xffc000, 30);
-			btn.x = 140;
-			btn.y = ((60 - 30) >> 1) + height - 60;
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragGuiDao);
-			addChild(btn);
-			
-			btn = createBtn('虚拟轨道', 0xffc000);
-			btn.x = 180;
-			btn.y = ((60 - 30) >> 1) + height - 60;
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragJiaGuiDao);
-			addChild(btn);
-			
-			btn = createBtn('卡扣', 0x00b050, 30);
-			btn.x = 250;
-			btn.y = ((60 - 30) >> 1) + height - 60;
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragKaKou);
-			addChild(btn);
+			//var btn:Sprite = createBtn('垂直线槽', 0x5b9bd5);
+			//btn.y = ((60 - 30) >> 1) + height - 60;
+			//btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragVXianCao);
+			//addChild(btn);
+			//
+			//btn = createBtn('水平线槽', 0x5b9bd5);
+			//btn.x = 70;
+			//btn.y = ((60 - 30) >> 1) + height - 60;
+			//btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragHXianCao);
+			//addChild(btn);
+			//
+			//btn = createBtn('轨道', 0xffc000, 30);
+			//btn.x = 140;
+			//btn.y = ((60 - 30) >> 1) + height - 60;
+			//btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragGuiDao);
+			//addChild(btn);
+			//
+			//btn = createBtn('虚拟轨道', 0xffc000);
+			//btn.x = 180;
+			//btn.y = ((60 - 30) >> 1) + height - 60;
+			//btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragJiaGuiDao);
+			//addChild(btn);
+			//
+			//btn = createBtn('卡扣', 0x00b050, 30);
+			//btn.x = 250;
+			//btn.y = ((60 - 30) >> 1) + height - 60;
+			//btn.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDragKaKou);
+			//addChild(btn);
 			
 			ConfigUtil.instance.addEventListener(LayoutEvent.IMPORT_XML_OK, _onReset);
 			
 			this.addEventListener(MouseEvent.MOUSE_WHEEL, _onMouseWheel);
+			_yuanJianContainer.addEventListener(MouseEvent.MOUSE_DOWN, _onContainerMouseDown);
+			_yuanJianContainer.addEventListener(MouseEvent.MOUSE_MOVE, _onContainerMouseMoved);
 		}
 		
 		public function addYuanJian(yuanJian:YuanJian):void {
@@ -112,7 +116,6 @@ package view {
 		
 		private function _onReset(e:LayoutEvent):void {
 			_yuanJianContainer.removeChildren();
-			_yuanJianArr.length = 0;
 			
 			var x:int = 0, y:int = 0, gap:int = 10, maxY:int = 0, maxH:int = 0;
 			var yuanJian:YuanJian;
@@ -127,7 +130,8 @@ package view {
 				yuanJian.y = y;
 				yuanJian.yuanJianX = x;
 				yuanJian.yuanJianY = y;
-				yuanJian.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDrag);
+				//yuanJian.addEventListener(MouseEvent.MOUSE_DOWN, _onStartDrag);
+				yuanJian.addEventListener(MouseEvent.CLICK, _onYuanJianClicked);
 				_yuanJianContainer.addChild(yuanJian);
 				x += yuanJian.reallyWidth + gap;
 				maxY = yuanJian.reallyHeight + yuanJian.y > maxY ? yuanJian.reallyHeight + yuanJian.y : maxY;
@@ -147,32 +151,55 @@ package view {
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.YUAN_JIAN_QU_INITED, e.xml, null, false, null, e.layoutXML));
 		}
 		
-		private function _onStartDrag(e:MouseEvent):void {
+		private function _onYuanJianClicked(e:MouseEvent):void {
 			const yuanJian:YuanJian = e.currentTarget as YuanJian;
 			if (yuanJian.parent == _yuanJianContainer) {
-				dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, yuanJian));
+				if (!yuanJian.isSelected) {
+					yuanJian.isSelected = true;
+					if (!e.ctrlKey) {
+						for (var i:int = 0; i < _yuanJianSelected.length; i++) {
+							_yuanJianSelected[i].isSelected = false;
+						}
+						_yuanJianSelected.length = 0;
+					}
+					_yuanJianSelected.push(yuanJian);
+				} else {
+					yuanJian.isSelected = false;
+					for (i = 0; i < _yuanJianSelected.length; i++) {
+						if (_yuanJianSelected[i] == yuanJian) {
+							_yuanJianSelected.splice(i, 1);
+						}
+					}
+				}
 			}
 		}
 		
-		private function _onStartDragVXianCao(e:MouseEvent):void {
-			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_V_XIAN_CAO));
-		}
+		//private function _onStartDrag(e:MouseEvent):void {
+			//const yuanJian:YuanJian = e.currentTarget as YuanJian;
+			//if (yuanJian.parent == _yuanJianContainer) {
+				//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, yuanJian));
+			//}
+		//}
 		
-		private function _onStartDragHXianCao(e:MouseEvent):void {
-			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_H_XIAN_CAO));
-		}
-		
-		private function _onStartDragGuiDao(e:MouseEvent):void {
-			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_GUI_DAO));
-		}
-		
-		private function _onStartDragJiaGuiDao(e:MouseEvent):void {
-			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO));
-		}
-		
-		private function _onStartDragKaKou(e:MouseEvent):void {
-			dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_KA_KOU));
-		}
+		//private function _onStartDragVXianCao(e:MouseEvent):void {
+			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_V_XIAN_CAO));
+		//}
+		//
+		//private function _onStartDragHXianCao(e:MouseEvent):void {
+			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_H_XIAN_CAO));
+		//}
+		//
+		//private function _onStartDragGuiDao(e:MouseEvent):void {
+			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_GUI_DAO));
+		//}
+		//
+		//private function _onStartDragJiaGuiDao(e:MouseEvent):void {
+			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO));
+		//}
+		//
+		//private function _onStartDragKaKou(e:MouseEvent):void {
+			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_KA_KOU));
+		//}
 		
 		private function _onMouseWheel(evt:MouseEvent):void {
 			if (evt.delta < 0) {
@@ -187,6 +214,20 @@ package view {
 					_yuanJianContainer.scaleY += .05;
 				}
 			}
+		}
+		
+		private function _onContainerMouseMoved(e:MouseEvent):void {
+			if (_startCheckMoved && e.buttonDown){
+				if (_yuanJianSelected.length > 0){
+					dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, null, false, null, null, _yuanJianSelected.slice()));
+					_yuanJianSelected.length = 0;
+					_startCheckMoved = false;
+				}
+			}
+		}
+		
+		private function _onContainerMouseDown(e:MouseEvent):void {
+			_startCheckMoved = true;
 		}
 	
 	}
