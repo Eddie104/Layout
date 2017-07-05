@@ -45,6 +45,8 @@ package events {
 		
 		static public const YUAN_JIAN_QU_INITED:String = "yuanJianQuInited";
 		
+		static public const CLIECKED:String = "cliecked";
+		
 		private var _xml:XML;
 		
 		private var _yuanJian:YuanJian;

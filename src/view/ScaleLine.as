@@ -43,9 +43,9 @@ package view {
 		
 		private var _movingRect:ScaleRect;
 		
-		private var _lastX:int;
+		private var _lastX:Number;
 		
-		private var _lastY:int;
+		private var _lastY:Number;
 		
 		private var _parent:Cell;
 		
@@ -80,7 +80,12 @@ package view {
 			var r:ScaleRect = new ScaleRect();
 			addChild(r);
 			r.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			r.addEventListener(MouseEvent.CLICK, _onMouseClicked);
 			return r;
+		}
+		
+		private function _onMouseClicked(e:MouseEvent):void {
+			e.stopImmediatePropagation();
 		}
 		
 		public function set parentCell(val:Cell):void {
@@ -245,10 +250,19 @@ package view {
 		}
 		
 		private function onMouseDown(evt:MouseEvent):void {
-			_movingRect = evt.currentTarget as ScaleRect;
-			_lastX = evt.stageX;
-			_lastY = evt.stageY;
-			evt.stopImmediatePropagation();
+			//_movingRect = evt.currentTarget as ScaleRect;
+			//_lastX = evt.stageX;
+			//_lastY = evt.stageY;
+			//evt.stopImmediatePropagation();
+		}
+		
+		public function mouseDown(rect:ScaleRect, x:Number, y:Number):void {
+			//_movingRect = evt.currentTarget as ScaleRect;
+			//_lastX = evt.stageX;
+			//_lastY = evt.stageY;
+			_movingRect = rect;
+			_lastX = x;
+			_lastY = y;
 		}
 		
 		private function _createBtn(name:String):Sprite {
@@ -278,7 +292,7 @@ package view {
 			return ScaleLine._instance;
 		}
 		
-		public function mouseMoved(stageX:int, stageY:int):Boolean {
+		public function mouseMoved(stageX:Number, stageY:Number):Boolean {
 			if (_parent && _movingRect && _movingRect.isEnabeld) {
 				var vx:Number = (stageX - _lastX);// / BuJuQu.containerScale;
 				var vy:Number = (stageY - _lastY);// / BuJuQu.containerScale;
@@ -297,8 +311,8 @@ package view {
 				case _topRect: 
 					//_parent.y = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).y / BuJuQu.containerScale;
 					//_parent.setSize(-1, _rightBottomRect.y - _movingRect.y);
-					_parent.y += vy;
-					_parent.setSize(-1, _rightBottomRect.y - _movingRect.y);
+					_parent.y += vy / BuJuQu.containerScale;
+					_parent.setSize(-1, _parent.reallyHeight - vy / BuJuQu.containerScale);
 					break;
 				case _rightTopRect: 
 					p = this.localToGlobal(new Point(_movingRect.x, _movingRect.y));
@@ -306,21 +320,22 @@ package view {
 					_parent.setSize(_rightTopRect.x - _leftTopRect.x, _rightBottomRect.y - _movingRect.y);
 					break;
 				case _rightRect: 
-					_parent.setSize(_rightRect.x - _leftTopRect.x);
+					_parent.setSize(_parent.reallyWidth + vx / BuJuQu.containerScale);
 					break;
 				case _rightBottomRect: 
 					_parent.setSize(_rightBottomRect.x - _leftTopRect.x, _rightBottomRect.y - _rightTopRect.y);
 					break;
 				case _bottomRect: 
-					_parent.setSize(-1, _bottomRect.y - _rightTopRect.y);
+					//_parent.setSize(-1, _bottomRect.y - _rightTopRect.y);
+					_parent.setSize(-1, _parent.reallyHeight + vy / BuJuQu.containerScale);
 					break;
 				case _leftBottomRect: 
 					_parent.x = this.localToGlobal(new Point(_movingRect.x, _movingRect.y)).x / BuJuQu.containerScale;
 					_parent.setSize(_rightBottomRect.x - _leftBottomRect.x, _leftBottomRect.y - _rightTopRect.y);
 					break;
 				case _leftRect: 
-					_parent.x += vx;
-					_parent.setSize(_rightRect.x - _leftRect.x);
+					_parent.x += vx / BuJuQu.containerScale;
+					_parent.setSize(_parent.reallyWidth - vx / BuJuQu.containerScale);
 					break;
 				case _centerRect: 
 					if (_parent is YuanJian) {
@@ -435,15 +450,16 @@ package view {
 			}
 		}
 		
-		public function mouseUped():void {
+		public function mouseUped():Boolean {
 			_movingRect = null;
 			if (_parent) {
-				_parent.x = int(_parent.x);
-				_parent.y = int(_parent.y);
+				_parent.quZheng();
 				resetRect();
 				_resetBtn();
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));
+				return true;
 			}
+			return false;
 		}
 	}
 

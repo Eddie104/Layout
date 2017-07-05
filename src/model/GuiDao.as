@@ -129,7 +129,7 @@ package model {
 				resetYuanJian();
 		}
 		
-		override public function setSize(w:int, h:int = -1):void {
+		override public function setSize(w:Number, h:Number = -1):void {
 			super.setSize(w, h);
 			resetYuanJian();
 		}

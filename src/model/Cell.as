@@ -1,7 +1,9 @@
 package model {
+	import events.LayoutEvent;
 	import flash.display.Graphics;
 	import flash.display.Shape;
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.text.TextField;
 	
@@ -13,9 +15,9 @@ package model {
 		
 		public static const FILTER:Array = [new GlowFilter(0xff0000)];
 		
-		protected var _w:int;
+		protected var _w:Number;
 		
-		protected var _h:int;
+		protected var _h:Number;
 		
 		protected var _bgColor:int;
 		
@@ -25,8 +27,15 @@ package model {
 		
 		protected var _nameTF:TextField = new TextField();
 		
+		//protected var _eventSprite:Sprite;
+		
 		public function Cell(width:int, height:int, bgColor:int) {
 			super();
+			//_eventSprite = new Sprite();
+			//_eventSprite.mouseEnabled = false;
+			////_eventSprite.addEventListener(MouseEvent.CLICK, _onClicked);
+			//addChild(_eventSprite);
+			
 			_redundantShap = new Shape();
 			_redundantShap.visible = false;
 			addChild(_redundantShap);
@@ -42,7 +51,12 @@ package model {
 			addChildAt(_nameTF, 0);
 		}
 		
-		public function setSize(w:int, h:int = -1):void {
+		//private function _onClicked(e:MouseEvent):void {
+			////e.stopImmediatePropagation();
+			////dispatchEvent(new LayoutEvent(LayoutEvent.CLIECKED));
+		//}
+		
+		public function setSize(w:Number, h:Number = -1):void {
 			if (w > -1)
 				this._w = w;
 			if (h > -1)
@@ -71,6 +85,11 @@ package model {
 			_redundantShap.graphics.lineTo(_w, _h);
 			_redundantShap.graphics.moveTo(_w, 0);
 			_redundantShap.graphics.lineTo(0, _h);
+			
+			//this._eventSprite.graphics.clear();
+			//this._eventSprite.graphics.beginFill(0x000000, .5);
+			//this._eventSprite.graphics.drawRect(0, 0, _w, _h);
+			//this._eventSprite.graphics.endFill();
 		}
 		
 		public function get isSelected():Boolean {
@@ -82,12 +101,18 @@ package model {
 			this.filters = val ? FILTER : null;
 		}
 		
-		public function get reallyWidth():int {
+		public function get reallyWidth():Number {
 			return _w;
 		}
 		
-		public function get reallyHeight():int {
+		public function get reallyHeight():Number {
 			return _h;
+		}
+		
+		public function quZheng():void{
+			this.x = int(this.x);
+			this.y = int(this.y);
+			this.setSize(int(this._w), int(this._h));
 		}
 		
 		override public function get name():String {

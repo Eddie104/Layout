@@ -130,7 +130,7 @@ package view {
 				guiDao.name = (++_numGuiDao).toString();
 			}
 			_guiDaoContainer.addChild(guiDao);
-			guiDao.addEventListener(MouseEvent.CLICK, _onCellClicked);
+			guiDao.addEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 			guiDao.addEventListener(LayoutEvent.SHOW_YUAN_JIAN_SHU_XING, _onShowYuanJianShuXing);
 			guiDao.addEventListener(LayoutEvent.DELETE, _onDeleteYuanJian);
 			
@@ -169,7 +169,7 @@ package view {
 				xianCao.name = (++_numXianCao).toString();
 			}
 			_xianCaoContainer.addChild(xianCao);
-			xianCao.addEventListener(MouseEvent.CLICK, _onCellClicked);
+			xianCao.addEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 			
 			ScaleLine.instance.parentCell = xianCao;
 			
@@ -257,7 +257,7 @@ package view {
 				if (_selectedCell is GuiDao) {
 					const guiDao:GuiDao = _selectedCell as GuiDao;
 					_guiDaoContainer.removeChild(guiDao);
-					guiDao.removeEventListener(MouseEvent.CLICK, _onCellClicked);
+					guiDao.removeEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 					guiDao.removeEventListener(LayoutEvent.SHOW_YUAN_JIAN_SHU_XING, _onShowYuanJianShuXing);
 					guiDao.removeEventListener(LayoutEvent.DELETE, _onDeleteYuanJian);
 					
@@ -268,11 +268,11 @@ package view {
 					}
 				} else if (_selectedCell is XianCao) {
 					_xianCaoContainer.removeChild(_selectedCell);
-					_selectedCell.removeEventListener(MouseEvent.CLICK, _onCellClicked);
+					_selectedCell.removeEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 				} else if (_selectedCell is YuanJian) {
 					deleteYuanJian(_selectedCell as YuanJian);
-					//(_selectedCell.parent as GuiDao).removeYuanJian(_selectedCell as YuanJian);
-					//dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, _selectedCell as YuanJian));
+						//(_selectedCell.parent as GuiDao).removeYuanJian(_selectedCell as YuanJian);
+						//dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, _selectedCell as YuanJian));
 				}
 				ScaleLine.instance.parentCell = null;
 				_selectedCell = null;
@@ -280,7 +280,7 @@ package view {
 		}
 		
 		public function deleteYuanJian(yuanJian:YuanJian):void {
-			if (yuanJian.parent is GuiDao){
+			if (yuanJian.parent is GuiDao) {
 				(yuanJian.parent as GuiDao).removeYuanJian(yuanJian);
 				dispatchEvent(new LayoutEvent(LayoutEvent.RESET_YUAN_JIAN, null, yuanJian));
 				if (ScaleLine.instance.parentCell == yuanJian) {
@@ -310,11 +310,11 @@ package view {
 			_container.scaleY = 1;
 			containerScale = 1;
 			for (var i:int = 0; i < _xianCaoContainer.numChildren; i++) {
-				_xianCaoContainer.getChildAt(i).removeEventListener(MouseEvent.CLICK, _onCellClicked);
+				_xianCaoContainer.getChildAt(i).removeEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 			}
 			this._xianCaoContainer.removeChildren();
 			for (i = 0; i < _guiDaoContainer.numChildren; i++) {
-				_guiDaoContainer.getChildAt(i).removeEventListener(MouseEvent.CLICK, _onCellClicked);
+				_guiDaoContainer.getChildAt(i).removeEventListener(LayoutEvent.CLIECKED, _onCellClicked);
 				_guiDaoContainer.getChildAt(i).removeEventListener(LayoutEvent.SHOW_YUAN_JIAN_SHU_XING, _onShowYuanJianShuXing);
 				_guiDaoContainer.getChildAt(i).removeEventListener(LayoutEvent.DELETE, _onDeleteYuanJian);
 			}
@@ -392,13 +392,15 @@ package view {
 			cellClicked(e.yuanJian, e.isCtrlKey);
 		}
 		
-		private function _onCellClicked(e:MouseEvent):void {
+		private function _onCellClicked(e:LayoutEvent):void {
 			const cell:Cell = e.currentTarget as Cell;
-			cellClicked(cell, e.ctrlKey);
+			//if (e.localX < cell.reallyWidth && e.localY < cell.reallyHeight){
+			cellClicked(cell);
 			e.stopImmediatePropagation();
+			//}
 		}
 		
-		private function cellClicked(cell:Cell, isCtrlKey:Boolean):void {
+		private function cellClicked(cell:Cell, isCtrlKey:Boolean = false):void {
 			//if (cell.isSelected) {
 			//if (!isCtrlKey) {
 			//_clearSelectedCell();
@@ -512,16 +514,34 @@ package view {
 		}
 		
 		private function _onMouseUp(evt:MouseEvent):void {
-			ScaleLine.instance.mouseUped();
+			if (ScaleLine.instance.mouseUped()) {
+				evt.stopImmediatePropagation();
+			}
 			this._isDraging = false;
 		}
 		
 		private function _onMouseDown(e:MouseEvent):void {
-			if (e.target == _container) {
-				this._isDraging = true;
-				_dragingLastX = e.stageX;
-				_dragingLastY = e.stageY;
+			//if (e.target is Cell){
+			////const cell:Cell = e.target as Cell;
+			////if (e.localX < cell.reallyWidth && e.localY < cell.reallyHeight){
+			////return;
+			////}
+			//}
+			
+			
+			const arr:Array = getObjectsUnderPoint(new Point(e.stageX, e.stageY));
+			for (var i:int = arr.length - 1; i > -1; i--) {
+				if (arr[i] is ScaleRect) {
+					ScaleLine.instance.mouseDown(arr[i] as ScaleRect, e.stageX, e.stageY);
+					return;
+				} else if (arr[i] is Cell){
+					return;
+				}
 			}
+			
+			this._isDraging = true;
+			_dragingLastX = e.stageX;
+			_dragingLastY = e.stageY;
 		}
 		
 		private function _onMouseMoved(evt:MouseEvent):void {
@@ -550,10 +570,22 @@ package view {
 		}
 		
 		private function _onBuJuClicked(e:MouseEvent):void {
-			ScaleLine.instance.parentCell = null;
-			if (_selectedCell) {
-				_selectedCell.isSelected = false;
-				_selectedCell = null;
+			const arr:Array = getObjectsUnderPoint(new Point(e.stageX, e.stageY));
+			var cell:Cell = null;
+			for (var i:int = arr.length - 1; i > -1; i--) {
+				if (arr[i] is Cell) {
+					cell = arr[i] as Cell;
+					break;
+				}
+			}
+			if (cell) {
+				cellClicked(cell);
+			} else {
+				ScaleLine.instance.parentCell = null;
+				if (_selectedCell) {
+					_selectedCell.isSelected = false;
+					_selectedCell = null;
+				}
 			}
 		}
 		
