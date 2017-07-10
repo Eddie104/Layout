@@ -25,7 +25,8 @@ package view {
 		
 		public static var containerScale:Number = 1;
 		
-		//public var selectedCellArr:Vector.<Cell> = new Vector.<Cell>();
+		public var selectedYuanJianArr:Vector.<YuanJian> = new Vector.<YuanJian>();
+		
 		private var _selectedCell:Cell;
 		
 		private var _guiDaoContainer:Sprite;
@@ -57,6 +58,8 @@ package view {
 		private var _keyPool:KeyPoll;
 		
 		private var _copyedCell:Cell;
+		
+		private var _startCheckMoved:Boolean;
 		
 		public function BuJuQu(width:int, height:int) {
 			super();
@@ -109,7 +112,7 @@ package view {
 			}
 		}
 		
-		public function addGuiDao(isJiaDe:Boolean, w:int = 50, h:int = 40, x:int = 0, y:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false):void {
+		public function addGuiDao(isJiaDe:Boolean, w:int = 50, h:int = 40, x:int = 0, y:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false, isInit:Boolean = false):void {
 			if (!isCopy) {
 				if (isDrag) {
 					x = (x - _container.x) / _container.scaleX;
@@ -118,9 +121,17 @@ package view {
 					x = x / _container.scaleX;
 					y = y / _container.scaleY;
 				}
+				if (!isInit) {
+					// 找到左右最近的线槽，自动调整
+					const p:Point = _xianCaoContainer.globalToLocal(new Point(mouseX, mouseY));
+					const leftXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.LEFT);
+					const rightXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.RIGHT);
+					x = leftXianCao.x + leftXianCao.reallyWidth;
+					w = rightXianCao.x - x;
+				}
 			}
-			var guiDao:GuiDao = new GuiDao(isJiaDe ? _w - 20 * 2 : w, isJiaDe ? 10 : h, Enum.H, isJiaDe);
-			guiDao.x = isJiaDe ? 20 : x;
+			var guiDao:GuiDao = new GuiDao(w, h, Enum.H, isJiaDe);
+			guiDao.x = x;
 			guiDao.y = y;
 			guiDao.typeStr = type;
 			if (name) {
@@ -146,7 +157,7 @@ package view {
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.ADD_GUI_DAO));
 		}
 		
-		public function addXianCao(w:int = 200, h:int = 80, x:int = 0, y:int = 0, dir:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false):void {
+		public function addXianCao(w:int = 200, h:int = 80, x:int = 0, y:int = 0, dir:int = 0, name:String = null, type:String = '', isDrag:Boolean = false, isCopy:Boolean = false, isInit:Boolean = false):void {
 			if (!isCopy) {
 				if (isDrag) {
 					x = (x - _container.x) / _container.scaleX;
@@ -155,9 +166,28 @@ package view {
 					x = x / _container.scaleX;
 					y = y / _container.scaleY;
 				}
+				if (!isInit) {
+					// 找到左右最近的线槽，自动调整
+					const p:Point = _xianCaoContainer.globalToLocal(new Point(mouseX, mouseY));
+					if (dir == Enum.H) {
+						const leftXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.LEFT);
+						const rightXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.RIGHT);
+						if (leftXianCao && rightXianCao) {
+							x = leftXianCao.x + leftXianCao.reallyWidth;
+							w = rightXianCao.x - x;
+						}
+					} else {
+						const topXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.TOP);
+						const bottomXianCao:XianCao = findNearestXianCao(p.x, p.y, Enum.DOWN);
+						if (topXianCao && bottomXianCao) {
+							y = topXianCao.y + topXianCao.reallyHeight;
+							h = bottomXianCao.y - y;
+						}
+					}
+				}
 			}
 			
-			var xianCao:XianCao = new XianCao(w, h, Enum.H);
+			var xianCao:XianCao = new XianCao(w, h, dir);
 			xianCao.x = x;
 			xianCao.y = y;
 			xianCao.typeStr = type;
@@ -181,6 +211,62 @@ package view {
 			_selectedCell = xianCao;
 			xianCao.isSelected = true;
 			this.dispatchEvent(new LayoutEvent(LayoutEvent.ADD_XIAN_CAO));
+		}
+		
+		private function findNearestXianCao(x:int, y:int, dir:int):XianCao {
+			var xianCao:XianCao = null;
+			var result:XianCao = null;
+			var min:int = int.MAX_VALUE;
+			if (dir == Enum.TOP) {
+				for (var i:int = 0; i < _xianCaoContainer.numChildren; i++) {
+					xianCao = _xianCaoContainer.getChildAt(i) as XianCao;
+					if (xianCao.dir == Enum.H && xianCao.y + xianCao.reallyHeight < y) {
+						if (xianCao.x < x && xianCao.x + xianCao.reallyWidth > x) {
+							if (min > y - (xianCao.y + xianCao.reallyHeight)) {
+								min = y - (xianCao.y + xianCao.reallyHeight);
+								result = xianCao;
+							}
+						}
+					}
+				}
+			} else if (dir == Enum.RIGHT) {
+				for (i = 0; i < _xianCaoContainer.numChildren; i++) {
+					xianCao = _xianCaoContainer.getChildAt(i) as XianCao;
+					if (xianCao.dir == Enum.V && xianCao.x > x) {
+						if (xianCao.y < y && xianCao.y + xianCao.reallyHeight > y) {
+							if (min > xianCao.x - x) {
+								min = xianCao.x - x;
+								result = xianCao;
+							}
+						}
+					}
+				}
+			} else if (dir == Enum.DOWN) {
+				for (i = 0; i < _xianCaoContainer.numChildren; i++) {
+					xianCao = _xianCaoContainer.getChildAt(i) as XianCao;
+					if (xianCao.dir == Enum.H && xianCao.y > y) {
+						if (xianCao.x < x && xianCao.x + xianCao.reallyWidth > x) {
+							if (min > xianCao.y - y) {
+								min = xianCao.y - y;
+								result = xianCao;
+							}
+						}
+					}
+				}
+			} else if (dir == Enum.LEFT) {
+				for (i = 0; i < _xianCaoContainer.numChildren; i++) {
+					xianCao = _xianCaoContainer.getChildAt(i) as XianCao;
+					if (xianCao.dir == Enum.V && xianCao.x + xianCao.reallyWidth < x) {
+						if (xianCao.y < y && xianCao.y + xianCao.reallyHeight > y) {
+							if (min > x - (xianCao.x + xianCao.reallyWidth)) {
+								min = x - (xianCao.x + xianCao.reallyWidth);
+								result = xianCao;
+							}
+						}
+					}
+				}
+			}
+			return result;
 		}
 		
 		public function exportXianCao():String {
@@ -332,16 +418,16 @@ package view {
 			const layoutXML:XML = evt.layoutXML;
 			if (layoutXML) {
 				for each (var item:* in layoutXML.layout.trunking) {
-					this.addXianCao(item.@w, item.@h, item.@x, item.@y, item.@dir, item.@name, item.@type);
+					this.addXianCao(item.@w, item.@h, item.@x, item.@y, item.@dir, item.@name, item.@type, false, false, true);
 				}
 				for each (item in layoutXML.layout.pathway) {
-					this.addGuiDao(item.@virtual == 'true', item.@w, item.@h, item.@x, item.@y, item.@name, item.@type);
+					this.addGuiDao(item.@virtual == 'true', item.@w, item.@h, item.@x, item.@y, item.@name, item.@type, false, false, true);
 				}
 			} else {
-				this.addXianCao(_w, 20, 0, 0, Enum.H);
-				this.addXianCao(20, _h, _w - 20, 0, Enum.V);
-				this.addXianCao(_w, 20, 0, _h - 20, Enum.H);
-				this.addXianCao(20, _h, 0, 0, Enum.V);
+				this.addXianCao(_w, 20, 0, 0, Enum.H, null, '', false, false, true);
+				this.addXianCao(20, _h, _w - 20, 0, Enum.V, null, '', false, false, true);
+				this.addXianCao(_w, 20, 0, _h - 20, Enum.H, null, '', false, false, true);
+				this.addXianCao(20, _h, 0, 0, Enum.V, null, '', false, false, true);
 			}
 			
 			var scale:Number = _viewWidth / _w;
@@ -353,7 +439,7 @@ package view {
 			_container.scaleY = scale;
 			containerScale = scale;
 			
-			if (_h > _w) {
+			if (_h < _w) {
 				this._minScale = _viewHeight / _h;
 			} else {
 				this._minScale = _viewWidth / _w;
@@ -401,26 +487,35 @@ package view {
 		}
 		
 		private function cellClicked(cell:Cell, isCtrlKey:Boolean = false):void {
-			//if (cell.isSelected) {
-			//if (!isCtrlKey) {
-			//_clearSelectedCell();
-			//cell.isSelected = true;
-			//selectedCellArr.push(cell);
-			//} else {
-			//cell.isSelected = false;
-			//for (var i:int = 0; i < this.selectedCellArr.length; i++) {
-			//if (this.selectedCellArr[i] == cell) {
-			//this.selectedCellArr.splice(i, 1);
-			//}
-			//}
-			//}
-			//} else {
-			//if (!isCtrlKey) {
-			//_clearSelectedCell();
-			//}
-			//cell.isSelected = true;
-			//selectedCellArr.push(cell);
-			//}
+			if (cell is YuanJian && isCtrlKey) {
+				ScaleLine.instance.parentCell = null;
+				if (_selectedCell) {
+					_selectedCell.isSelected = false;
+					_selectedCell = null;
+				}
+				
+				yuanJian = cell as YuanJian;
+				var has:Boolean = false;
+				for (i = 0; i < selectedYuanJianArr.length; i++) {
+					if (selectedYuanJianArr[i] == yuanJian) {
+						selectedYuanJianArr.splice(i, 1);
+						yuanJian.isSelected = false;
+						has = true;
+						break;
+					}
+				}
+				if (!has) {
+					yuanJian.isSelected = true;
+					selectedYuanJianArr.push(yuanJian);
+				}
+				return;
+			} else {
+				for (i = 0; i < selectedYuanJianArr.length; i++) {
+					selectedYuanJianArr[i].isSelected = false;
+				}
+				selectedYuanJianArr.length = 0;
+			}
+			
 			if (_selectedCell) {
 				if (_selectedCell == cell) return;
 				_selectedCell.isSelected = false;
@@ -527,14 +622,14 @@ package view {
 			////return;
 			////}
 			//}
-			
+			_startCheckMoved = true;
 			
 			const arr:Array = getObjectsUnderPoint(new Point(e.stageX, e.stageY));
 			for (var i:int = arr.length - 1; i > -1; i--) {
 				if (arr[i] is ScaleRect) {
 					ScaleLine.instance.mouseDown(arr[i] as ScaleRect, e.stageX, e.stageY);
 					return;
-				} else if (arr[i] is Cell){
+				} else if (arr[i] is Cell) {
 					return;
 				}
 			}
@@ -564,6 +659,14 @@ package view {
 						_container.y += mouseY - _dragingLastY;
 						_dragingLastX = mouseX;
 						_dragingLastY = mouseY;
+					}
+				}
+				
+				if (_startCheckMoved) {
+					if (selectedYuanJianArr.length > 0) {
+						dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, null, false, null, null, selectedYuanJianArr.slice()));
+						selectedYuanJianArr.length = 0;
+						_startCheckMoved = false;
 					}
 				}
 			}

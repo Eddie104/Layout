@@ -7,7 +7,7 @@ package model {
 	 */
 	public class YuanJian extends Cell {
 		
-		protected var _offsetX:int;
+		protected var _offsetX:Number;
 		
 		protected var _guiDao:GuiDao;
 		
@@ -32,11 +32,11 @@ package model {
 			this.name = name;
 		}
 		
-		public function get offsetX():int {
+		public function get offsetX():Number {
 			return _offsetX;
 		}
 		
-		public function set offsetX(value:int):void {
+		public function set offsetX(value:Number):void {
 			_offsetX = value;
 			if (_guiDao)
 				_guiDao.resetYuanJian();
@@ -138,6 +138,11 @@ package model {
 				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" bottomItem="' + bottomYuanJian.name + '" />';
 			}
 			return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
+		}
+		
+		override public function quZheng():void {
+			this._offsetX = int(this._offsetX);
+			super.quZheng();
 		}
 	
 	}

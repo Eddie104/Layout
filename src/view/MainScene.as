@@ -46,6 +46,7 @@ package view {
 			_buJuQu = new BuJuQu(stageWidth >> 1, stageHeight - bottomPanelHeight);
 			addChild(_buJuQu);
 			_buJuQu.addEventListener(LayoutEvent.RESET_YUAN_JIAN, _onResetYuanJian);
+			_buJuQu.addEventListener(LayoutEvent.START_TO_DTAG_YUAN_JIAN, _onStartToDragYuanJian);
 			
 			_yuanJianQu = new YuanJianQu(stageWidth >> 1, stageHeight - bottomPanelHeight);
 			_yuanJianQu.x = stageWidth >> 1;
@@ -233,10 +234,10 @@ package view {
 						_buJuQu.addGuiDao(true, DragingBitmap.GUI_DAO_W, DragingBitmap.GUI_DAO_H, e.stageX, e.stageY, null, '', true);
 					} else {
 						// 首先判断鼠标点上下10px范围内是否有元件，有的话，就吸附在该元件上
+						p = new Point(e.stageX, e.stageY);
 						var targetYuanJian:YuanJian = null;
 						if (_dragingBitmap.yuanJianArr.length == 1) {
-							p = new Point(e.stageX, e.stageY);
-							p.y -= 10;
+							p.y = e.stageY - 10;
 							var cellArr:Array = getObjectsUnderPoint(p);
 							for (i = cellArr.length - 1; i > -1; i--) {
 								if (cellArr[i] is YuanJian) {
@@ -250,7 +251,7 @@ package view {
 							targetYuanJian.bottomYuanJian = _dragingBitmap.yuanJianArr[0];
 						} else {
 							if (_dragingBitmap.yuanJianArr.length == 1) {
-								p.y += 20;
+								p.y = e.stageY + 10;
 								cellArr = getObjectsUnderPoint(p);
 								for (i = cellArr.length - 1; i > -1; i--) {
 									if (cellArr[i] is YuanJian) {
@@ -264,7 +265,7 @@ package view {
 								targetYuanJian.topYuanJian = _dragingBitmap.yuanJianArr[0];
 							} else {
 								// 再判断是否能放到轨道上
-								p.y -= 10;
+								p.y = e.stageY;
 								guiDao = null;
 								cellArr = this.getObjectsUnderPoint(p);
 								for (i = cellArr.length - 1; i > -1; i--) {

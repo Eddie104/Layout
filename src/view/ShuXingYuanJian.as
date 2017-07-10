@@ -1,5 +1,6 @@
 package view {
 	import flash.display.Shape;
+	import flash.display3D.textures.Texture;
 	import flash.events.Event;
 	import flash.text.TextField;
 	import flash.text.TextFieldType;
@@ -15,6 +16,8 @@ package view {
 		protected var _marginTopTF:TextField;
 		
 		protected var _margionBottomTF:TextField;
+		
+		protected var _offsetTF:TextField;
 		
 		public function ShuXingYuanJian(width:int, height:int, type:String = '元件') {
 			super(width, height, type);
@@ -87,6 +90,27 @@ package view {
 			_margionBottomTF.y = label.y;
 			//_margionBottomTF.addEventListener(Event.CHANGE, _onXChanged);
 			addChild(_margionBottomTF);
+			
+			label = new TextField();
+			label.mouseEnabled = false;
+			label.text = '调整值:';
+			label.x = 0;
+			label.y = 60;
+			addChild(label);
+			
+			border = _drawInputBorder(30, 18);
+			border.x = 40 + label.x;
+			border.y = label.y;
+			addChild(border);
+			_offsetTF = new TextField();
+			_offsetTF.type = TextFieldType.INPUT;
+			_offsetTF.text = '0';
+			_offsetTF.width = 30;
+			_offsetTF.height = 18;
+			_offsetTF.x = 40 + label.x;
+			_offsetTF.y = label.y;
+			_offsetTF.addEventListener(Event.CHANGE, _onOffsetChanged);
+			addChild(_offsetTF);
 		}
 		
 		override public function setCurCell(cell:Cell):void {
@@ -96,7 +120,12 @@ package view {
 				this._xTF.text = yuanJian.offsetX.toString();
 				_marginTopTF.text = yuanJian.marginTopToXianCao.toString();
 				_margionBottomTF.text = yuanJian.marginBottomToXianCao.toString();
+				_offsetTF.text = ScaleLine.OFFSET.toString();
 			}
+		}
+		
+		private function _onOffsetChanged(e:Event):void {
+			ScaleLine.OFFSET = int(_offsetTF.text);
 		}
 		
 		override protected function _onXChanged(e:Event):void {

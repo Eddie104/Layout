@@ -14,6 +14,8 @@ package view {
 		
 		private var _typeTF:TextField;
 		
+		private var _offsetTF:TextField;
+		
 		public function ShuXingXianCao(width:int, height:int) {
 			super(width, height, '线槽');
 		}
@@ -126,6 +128,31 @@ package view {
 			_typeTF.y = label.y;
 			_typeTF.addEventListener(Event.CHANGE, _onTypeChanged);
 			addChild(_typeTF);
+			
+			label = new TextField();
+			label.mouseEnabled = false;
+			label.text = '调整值:';
+			label.x = 0;
+			label.y = 60;
+			addChild(label);
+			
+			border = _drawInputBorder(30, 18);
+			border.x = 40 + label.x;
+			border.y = label.y;
+			addChild(border);
+			_offsetTF = new TextField();
+			_offsetTF.type = TextFieldType.INPUT;
+			_offsetTF.text = '0';
+			_offsetTF.width = 30;
+			_offsetTF.height = 18;
+			_offsetTF.x = 40 + label.x;
+			_offsetTF.y = label.y;
+			_offsetTF.addEventListener(Event.CHANGE, _onOffsetChanged);
+			addChild(_offsetTF);
+		}
+		
+		private function _onOffsetChanged(e:Event):void {
+			ScaleLine.OFFSET = int(_offsetTF.text);
 		}
 		
 		override public function setCurCell(cell:Cell):void {
@@ -135,6 +162,7 @@ package view {
 				if ((cell as XianCao).dir == Enum.H) {
 					_widthTF.text = cell.reallyHeight.toString();
 					_heightTF.text = cell.reallyWidth.toString();
+					_offsetTF.text = ScaleLine.OFFSET.toString();
 				}
 			}
 		}

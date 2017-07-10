@@ -19,6 +19,8 @@ package view {
 		
 		private static var _instance:ScaleLine;
 		
+		public static var OFFSET:int = 1;
+		
 		private var _leftTopRect:ScaleRect;
 		
 		private var _topRect:ScaleRect;
@@ -342,13 +344,13 @@ package view {
 						//var guiDao:GuiDao;
 						//const arr:Array = Main.mainScene.buJuQu.getObjectsUnderPoint(new Point(stageX, stageY));
 						//for (var i:int = 0; i < arr.length; i++) {
-							//if (arr[i] is GuiDao) {
-								//guiDao = arr[i] as GuiDao;
-								//if (guiDao == this._parent.parent) {
-									//(_parent as YuanJian).offsetX += stageX - _lastX;
-									//break;
-								//}
-							//}
+						//if (arr[i] is GuiDao) {
+						//guiDao = arr[i] as GuiDao;
+						//if (guiDao == this._parent.parent) {
+						//(_parent as YuanJian).offsetX += stageX - _lastX;
+						//break;
+						//}
+						//}
 						//}
 						var yuanJianArr:Vector.<YuanJian> = new Vector.<YuanJian>();
 						yuanJianArr[0] = _parent as YuanJian;
@@ -390,7 +392,7 @@ package view {
 							if (arr[i] is GuiDao) {
 								guiDao = arr[i] as GuiDao;
 								if (guiDao == this._parent.parent) {
-									(_parent as YuanJian).offsetX += stageX - _lastX;
+									(_parent as YuanJian).offsetX += (stageX - _lastX) / BuJuQu.containerScale;
 									break;
 								}
 							}
@@ -416,7 +418,10 @@ package view {
 		
 		public function moveUp():void {
 			if (_parent) {
-				_parent.y -= 1;
+				if (_parent is YuanJian) {
+					return;
+				}
+				_parent.y -= OFFSET;
 				resetRect();
 				_resetBtn();
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));
@@ -425,16 +430,23 @@ package view {
 		
 		public function moveRight():void {
 			if (_parent) {
-				_parent.x += 1;
-				resetRect();
-				_resetBtn();
+				if (_parent is YuanJian) {
+					(_parent as YuanJian).offsetX += OFFSET;
+				} else {
+					_parent.x += OFFSET;
+					resetRect();
+					_resetBtn();
+				}
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));
 			}
 		}
 		
 		public function moveDown():void {
 			if (_parent) {
-				_parent.y += 1;
+				if (_parent is YuanJian) {
+					return;
+				}
+				_parent.y += OFFSET;
 				resetRect();
 				_resetBtn();
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));
@@ -443,9 +455,13 @@ package view {
 		
 		public function moveLeft():void {
 			if (_parent) {
-				_parent.x -= 1;
-				resetRect();
-				_resetBtn();
+				if (_parent is YuanJian) {
+					(_parent as YuanJian).offsetX -= OFFSET;
+				} else {
+					_parent.x -= OFFSET;
+					resetRect();
+					_resetBtn();
+				}
 				dispatchEvent(new LayoutEvent(LayoutEvent.UPDATE_CELL, null, null, false, _parent));
 			}
 		}

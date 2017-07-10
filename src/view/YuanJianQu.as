@@ -175,30 +175,30 @@ package view {
 		}
 		
 		//private function _onStartDrag(e:MouseEvent):void {
-			//const yuanJian:YuanJian = e.currentTarget as YuanJian;
-			//if (yuanJian.parent == _yuanJianContainer) {
-				//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, yuanJian));
-			//}
+		//const yuanJian:YuanJian = e.currentTarget as YuanJian;
+		//if (yuanJian.parent == _yuanJianContainer) {
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, yuanJian));
+		//}
 		//}
 		
 		//private function _onStartDragVXianCao(e:MouseEvent):void {
-			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_V_XIAN_CAO));
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_V_XIAN_CAO));
 		//}
 		//
 		//private function _onStartDragHXianCao(e:MouseEvent):void {
-			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_H_XIAN_CAO));
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_H_XIAN_CAO));
 		//}
 		//
 		//private function _onStartDragGuiDao(e:MouseEvent):void {
-			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_GUI_DAO));
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_GUI_DAO));
 		//}
 		//
 		//private function _onStartDragJiaGuiDao(e:MouseEvent):void {
-			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO));
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_JIA_GUI_DAO));
 		//}
 		//
 		//private function _onStartDragKaKou(e:MouseEvent):void {
-			//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_KA_KOU));
+		//dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_KA_KOU));
 		//}
 		
 		private function _onMouseWheel(evt:MouseEvent):void {
@@ -217,8 +217,8 @@ package view {
 		}
 		
 		private function _onContainerMouseMoved(e:MouseEvent):void {
-			if (_startCheckMoved && e.buttonDown){
-				if (_yuanJianSelected.length > 0){
+			if (_startCheckMoved && e.buttonDown) {
+				if (_yuanJianSelected.length > 0) {
 					dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, null, false, null, null, _yuanJianSelected.slice()));
 					_yuanJianSelected.length = 0;
 					_startCheckMoved = false;
