@@ -1,5 +1,7 @@
 package model {
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import view.YuanJianTip;
 	
 	/**
 	 * ...
@@ -27,9 +29,34 @@ package model {
 		
 		protected var _marginBottomToXianCao:int;
 		
-		public function YuanJian(width:int, height:int, color:int, name:String) {
+		private var _code:String;
+		
+		public function YuanJian(width:int, height:int, color:int, name:String, code:String) {
 			super(width, height, color);
+			this._code = code;
 			this.name = name;
+			
+			this.addEventListener(MouseEvent.MOUSE_OVER, _onMouseOver);
+			this.addEventListener(MouseEvent.MOUSE_OUT, _onMouseOut);
+		}
+		
+		private function _onMouseOver(e:MouseEvent):void {
+			if (!(this.parent is GuiDao)) return;
+			if (e.target == this) {
+				const tip:YuanJianTip = YuanJianTip.instance;
+				tip.setYuanJian(this);
+				const p:Point = this.localToGlobal(new Point(e.localX, e.localY));
+				tip.x = p.x;
+				tip.y = p.y;
+				Main.mainScene.addChild(tip);
+			}
+		}
+		
+		private function _onMouseOut(e:MouseEvent):void {
+			const tip:YuanJianTip = YuanJianTip.instance;
+			if (tip.parent) {
+				tip.parent.removeChild(tip);
+			}
 		}
 		
 		public function get offsetX():Number {
@@ -120,24 +147,28 @@ package model {
 			_marginBottomToXianCao = value;
 		}
 		
+		public function get code():String {
+			return _code;
+		}
+		
 		override public function toXML():String {
 			//if (this.topYuanJian && !this.bottomYuanJian) {
-				//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<topItem name="' + topYuanJian.name + '" />\n\t\t</item>';
+			//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<topItem name="' + topYuanJian.name + '" />\n\t\t</item>';
 			//} else if (!this.topYuanJian && this.bottomYuanJian) {
-				//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<bottomItem name="' + bottomYuanJian.name + '" />\n\t\t</item>';
+			//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<bottomItem name="' + bottomYuanJian.name + '" />\n\t\t</item>';
 			//} else if (this.topYuanJian && this.bottomYuanJian) {
-				//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<topItem name="' + topYuanJian.name + '" />\n\t\t\t<bottomItem name="' + bottomYuanJian.name + '" />\n\t\t</item>';
+			//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '">\n\t\t\t<topItem name="' + topYuanJian.name + '" />\n\t\t\t<bottomItem name="' + bottomYuanJian.name + '" />\n\t\t</item>';
 			//}
 			//return '<item name="' + this.name + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
 			
 			if (this.topYuanJian && !this.bottomYuanJian) {
-				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" />';
+				return '<item code="' + this.code + '" name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" />';
 			} else if (!this.topYuanJian && this.bottomYuanJian) {
-				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" bottomItem="' + bottomYuanJian.name + '" />';
+				return '<item code="' + this.code + '" name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" bottomItem="' + bottomYuanJian.name + '" />';
 			} else if (this.topYuanJian && this.bottomYuanJian) {
-				return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" bottomItem="' + bottomYuanJian.name + '" />';
+				return '<item code="' + this.code + '" name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" topItem="' + topYuanJian.name + '" bottomItem="' + bottomYuanJian.name + '" />';
 			}
-			return '<item name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
+			return '<item code="' + this.code + '" name="' + this.name + '" color="0x' + _bgColor.toString(16) + '" w="' + _w + '" h="' + _h + '" pathway="' + this.guiDao.name + '" x="' + this.x + '" y="' + this.y + '" />';
 		}
 		
 		override public function quZheng():void {

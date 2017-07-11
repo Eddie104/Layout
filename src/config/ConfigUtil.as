@@ -43,7 +43,7 @@ package config {
 				// <item name="DK01" code="NUM0001" type="DK" rgb="255,0,0" size="50,50" />
 				tempArr = item.@size.split(',');
 				tempArr1 = item.@rgb.split(',');
-				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name));
+				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name, item.@code));
 			}
 			
 			_layoutName = _xml.layout.@name;
@@ -63,7 +63,7 @@ package config {
 			for each (var item:* in _layoutXML.items.item) {
 				if (item.@name != 'kaKou') {
 					if (!YuanJianManager.instance.getYuanJian(item.@name)) {
-						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name));
+						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name, item.@code));
 					}
 				}
 			}
