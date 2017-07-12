@@ -313,10 +313,10 @@ package view {
 							}
 							
 							guiDao.initYuanJian(yuanJian, item.@x, item.@y);
-							if (item.@topItem) {
+							if (item.@topItem != undefined) {
 								yuanJian.topYuanJian = YuanJianManager.instance.getYuanJian(item.@topItem);
 							}
-							if (item.@bottomItem) {
+							if (item.@bottomItem != undefined) {
 								yuanJian.bottomYuanJian = YuanJianManager.instance.getYuanJian(item.@bottomItem);
 							}
 							break;

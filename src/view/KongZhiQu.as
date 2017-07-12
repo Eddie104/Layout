@@ -141,8 +141,11 @@ package view {
 						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
 						if (yuanJian.guiDao)
 							yuanJian.guiDao.removeYuanJian(yuanJian);
-						else
-							yuanJian.parent.removeChild(yuanJian);
+						else {
+							if (yuanJian.parent) {
+								yuanJian.parent.removeChild(yuanJian);
+							}
+						}
 					}
 					
 					itemName = item.@bottomItem;
@@ -156,8 +159,11 @@ package view {
 						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
 						if (yuanJian.guiDao)
 							yuanJian.guiDao.removeYuanJian(yuanJian);
-						else
-							yuanJian.parent.removeChild(yuanJian);
+						else {
+							if (yuanJian.parent) {
+								yuanJian.parent.removeChild(yuanJian);
+							}
+						}
 					}
 				}
 			}

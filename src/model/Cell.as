@@ -122,6 +122,9 @@ package model {
 		override public function set name(value:String):void {
 			super.name = value;
 			this._nameTF.text = value;
+			this._nameTF.width = _w;
+			this._nameTF.height = this._nameTF.textHeight;
+			
 			_nameTF.x = (_w - _nameTF.textWidth) >> 1;
 			_nameTF.y = (_h - _nameTF.textHeight) >> 1;
 		}

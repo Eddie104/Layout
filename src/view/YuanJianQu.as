@@ -124,7 +124,7 @@ package view {
 				if (x + yuanJian.reallyWidth > _w) {
 					x = 0;
 					maxH = 0;
-					y = maxY + gap
+					y = maxY + gap;
 				}
 				yuanJian.x = x;
 				yuanJian.y = y;

@@ -64,6 +64,12 @@ package config {
 				if (item.@name != 'kaKou') {
 					if (!YuanJianManager.instance.getYuanJian(item.@name)) {
 						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name, item.@code));
+						if (item.@topItem != undefined) {
+							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@topItemW), int(item.@topItemH), int(item.@topItemColor), item.@topItem, item.@topItemCode));
+						}
+						if (item.@bottomItem != undefined) {
+							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@bottomItemW), int(item.@bottomItemH), int(item.@bottomItemColor), item.@bottomItem, item.@bottomItemCode));
+						}
 					}
 				}
 			}
