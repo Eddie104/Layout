@@ -25,6 +25,10 @@ package view {
 		
 		private var _startCheckMoved:Boolean;
 		
+		private var _mouseDownX:Number;
+		
+		private var _mouseDownY:Number;
+		
 		public function YuanJianQu(width:int, height:int) {
 			super();
 			_w = width;
@@ -219,15 +223,19 @@ package view {
 		private function _onContainerMouseMoved(e:MouseEvent):void {
 			if (_startCheckMoved && e.buttonDown) {
 				if (_yuanJianSelected.length > 0) {
-					dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, null, false, null, null, _yuanJianSelected.slice()));
-					_yuanJianSelected.length = 0;
-					_startCheckMoved = false;
+					if (Math.abs(e.stageY - _mouseDownY) > 10 && Math.abs(e.stageX - _mouseDownX) > 10) {
+						dispatchEvent(new LayoutEvent(LayoutEvent.START_TO_DTAG_YUAN_JIAN, null, null, false, null, null, _yuanJianSelected.slice()));
+						_yuanJianSelected.length = 0;
+						_startCheckMoved = false;	
+					}
 				}
 			}
 		}
 		
 		private function _onContainerMouseDown(e:MouseEvent):void {
 			_startCheckMoved = true;
+			_mouseDownX = e.stageX;
+			_mouseDownY = e.stageY;
 		}
 	
 	}

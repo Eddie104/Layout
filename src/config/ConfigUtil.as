@@ -62,7 +62,7 @@ package config {
 			
 			for each (var item:* in _layoutXML.items.item) {
 				if (item.@name != 'kaKou') {
-					if (!YuanJianManager.instance.getYuanJian(item.@name)) {
+					if (!YuanJianManager.instance.getYuanJian(item.@name, item.@code)) {
 						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name, item.@code));
 						if (item.@topItem != undefined) {
 							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@topItemW), int(item.@topItemH), int(item.@topItemColor), item.@topItem, item.@topItemCode));

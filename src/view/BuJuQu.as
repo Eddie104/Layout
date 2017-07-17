@@ -309,15 +309,15 @@ package view {
 							if (item.@name == 'kaKou') {
 								yuanJian = new KaKou(item.@w, item.@h, item.@type);
 							} else {
-								yuanJian = YuanJianManager.instance.getYuanJian(item.@name);
+								yuanJian = YuanJianManager.instance.getYuanJian(item.@name, item.@code);
 							}
 							
 							guiDao.initYuanJian(yuanJian, item.@x, item.@y);
 							if (item.@topItem != undefined) {
-								yuanJian.topYuanJian = YuanJianManager.instance.getYuanJian(item.@topItem);
+								yuanJian.topYuanJian = YuanJianManager.instance.getYuanJian(item.@topItem, item.@topItemCode);
 							}
 							if (item.@bottomItem != undefined) {
-								yuanJian.bottomYuanJian = YuanJianManager.instance.getYuanJian(item.@bottomItem);
+								yuanJian.bottomYuanJian = YuanJianManager.instance.getYuanJian(item.@bottomItem, item.@bottomItemCode);
 							}
 							break;
 						}

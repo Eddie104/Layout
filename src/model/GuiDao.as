@@ -70,7 +70,7 @@ package model {
 				yuanJian = yuanJianArr[i];
 				// 根据拖动，自动算出offsetX
 				const prevIndex:int = _yuanJianArr.indexOf(yuanJian) - 1;
-				if (i == 0){
+				if (i == 0) {
 					if (prevIndex > -1) {
 						var offsetX:int = p.x - (_yuanJianArr[prevIndex].x + _yuanJianArr[prevIndex].reallyWidth);
 						if (offsetX > 10) {
@@ -80,7 +80,7 @@ package model {
 						}
 					}
 				} else {
-					yuanJian.offsetX = 0;
+					yuanJian.offsetX = 5;
 				}
 				
 				yuanJian.isOnGuiDao = true;

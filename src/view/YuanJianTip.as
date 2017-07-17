@@ -19,9 +19,9 @@ package view {
 		
 		private var _codeTf:TextField;
 		
-		private var _widthTf:TextField;
-		
-		private var _heightTf:TextField;
+		//private var _widthTf:TextField;
+		//
+		//private var _heightTf:TextField;
 		
 		public function YuanJianTip() {
 			super();
@@ -61,33 +61,33 @@ package view {
 			_codeTf.y = label.y;
 			addChild(_codeTf);
 			
-			label = new TextField();
-			label.text = 'width:';
-			label.setTextFormat(_mytf);
-			label.x = 10;
-			label.y = 50;
-			addChild(label);
-			
-			_widthTf = new TextField();
-			_widthTf.text = 'dsfdsfdf';
-			_widthTf.setTextFormat(_mytf);
-			_widthTf.x = 50;
-			_widthTf.y = label.y;
-			addChild(_widthTf);
-			
-			label = new TextField();
-			label.text = 'height:';
-			label.setTextFormat(_mytf);
-			label.x = 10;
-			label.y = 70;
-			addChild(label);
-			
-			_heightTf = new TextField();
-			_heightTf.text = 'dsfdsfdf';
-			_heightTf.setTextFormat(_mytf);
-			_heightTf.x = 50;
-			_heightTf.y = label.y;
-			addChild(_heightTf);
+			//label = new TextField();
+			//label.text = 'width:';
+			//label.setTextFormat(_mytf);
+			//label.x = 10;
+			//label.y = 50;
+			//addChild(label);
+			//
+			//_widthTf = new TextField();
+			//_widthTf.text = 'dsfdsfdf';
+			//_widthTf.setTextFormat(_mytf);
+			//_widthTf.x = 50;
+			//_widthTf.y = label.y;
+			//addChild(_widthTf);
+			//
+			//label = new TextField();
+			//label.text = 'height:';
+			//label.setTextFormat(_mytf);
+			//label.x = 10;
+			//label.y = 70;
+			//addChild(label);
+			//
+			//_heightTf = new TextField();
+			//_heightTf.text = 'dsfdsfdf';
+			//_heightTf.setTextFormat(_mytf);
+			//_heightTf.x = 50;
+			//_heightTf.y = label.y;
+			//addChild(_heightTf);
 		}
 		
 		public function setYuanJian(yuanJian:YuanJian):void {
@@ -102,18 +102,18 @@ package view {
 			h = h > _codeTf.textWidth ? h : _codeTf.textWidth;
 			_codeTf.width = _codeTf.textWidth + 10;
 			
-			_widthTf.text = yuanJian.reallyWidth.toString();
-			_widthTf.setTextFormat(_mytf);
-			h = h > _widthTf.textWidth ? h : _widthTf.textWidth;
-			
-			_heightTf.text = yuanJian.reallyHeight.toString();
-			_heightTf.setTextFormat(_mytf);
-			h = h > _heightTf.textWidth ? h : _heightTf.textWidth;
+			//_widthTf.text = yuanJian.reallyWidth.toString();
+			//_widthTf.setTextFormat(_mytf);
+			//h = h > _widthTf.textWidth ? h : _widthTf.textWidth;
+			//
+			//_heightTf.text = yuanJian.reallyHeight.toString();
+			//_heightTf.setTextFormat(_mytf);
+			//h = h > _heightTf.textWidth ? h : _heightTf.textWidth;
 			
 			const g:Graphics = this.graphics;
 			g.clear();
 			g.beginFill(0x000000, .6);
-			g.drawRect(0, 0, h + 60, 100);
+			g.drawRect(0, 0, h + 60, 60);
 			g.endFill();
 		}
 		

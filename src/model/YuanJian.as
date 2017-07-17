@@ -37,8 +37,8 @@ package model {
 			if (color < 1) color = 0x00fff0;
 			if (!code) code = '';
 			super(width, height, color);
-			this._code = code;
 			this.name = name;
+			this.code = code;
 			
 			this.addEventListener(MouseEvent.MOUSE_OVER, _onMouseOver);
 			this.addEventListener(MouseEvent.MOUSE_OUT, _onMouseOut);
@@ -153,6 +153,16 @@ package model {
 		
 		public function get code():String {
 			return _code;
+		}
+		
+		public function set code(value:String):void {
+			_code = value;
+			this._nameTF.text = value;
+			this._nameTF.width = _w;
+			this._nameTF.height = this._nameTF.textHeight;
+			
+			_nameTF.x = (_w - _nameTF.textWidth) >> 1;
+			_nameTF.y = (_h - _nameTF.textHeight) >> 1;
 		}
 		
 		override public function toXML():String {

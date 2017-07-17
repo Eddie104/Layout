@@ -25,15 +25,15 @@ package model {
 		
 		public function clear():void {
 			for each (var y:YuanJian in itemArr) {
-				if(y.parent)
+				if (y.parent)
 					y.parent.removeChild(y);
 			}
 			itemArr.length = 0;
 		}
 		
-		public function getYuanJian(name:String):YuanJian {
+		public function getYuanJian(name:String, code:String):YuanJian {
 			for each (var y:YuanJian in itemArr) {
-				if (y.name == name) return y;
+				if (y.name == name && y.code == code) return y;
 			}
 			return null;
 		}

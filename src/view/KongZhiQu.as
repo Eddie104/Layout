@@ -111,9 +111,10 @@ package view {
 			const layoutXML:XML = ConfigUtil.instance.layoutXML;
 			var yuanJian:YuanJian;
 			if (layoutXML) {
-				var itemName:String;
+				var itemName:String, itemCode:String;
 				for each (var item:* in layoutXML.items.item) {
 					itemName = item.@name;
+					itemCode = item.@code;
 					if (itemName == 'kaKou') {
 						continue;
 					}
@@ -124,13 +125,14 @@ package view {
 						}
 					}
 					if (itemName) {
-						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName, itemCode);
 						if (yuanJian.guiDao)
 							yuanJian.guiDao.removeYuanJian(yuanJian);
 						else
 							yuanJian.parent.removeChild(yuanJian);
 					}
 					itemName = item.@topItem;
+					itemCode = item.@topItemCode;
 					for each (item1 in xml.items.item) {
 						if (itemName == item1.@name) {
 							itemName = null;
@@ -138,7 +140,7 @@ package view {
 						}
 					}
 					if (itemName) {
-						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName, itemCode);
 						if (yuanJian.guiDao)
 							yuanJian.guiDao.removeYuanJian(yuanJian);
 						else {
@@ -149,6 +151,7 @@ package view {
 					}
 					
 					itemName = item.@bottomItem;
+					itemCode = item.@bottomItemCode;
 					for each (item1 in xml.items.item) {
 						if (itemName == item1.@name) {
 							itemName = null;
@@ -156,7 +159,7 @@ package view {
 						}
 					}
 					if (itemName) {
-						yuanJian = YuanJianManager.instance.getYuanJian(itemName);
+						yuanJian = YuanJianManager.instance.getYuanJian(itemName, itemCode);
 						if (yuanJian.guiDao)
 							yuanJian.guiDao.removeYuanJian(yuanJian);
 						else {
@@ -240,9 +243,10 @@ package view {
 			const xml:XML = ConfigUtil.instance.xml;
 			const layoutXML:XML = ConfigUtil.instance.layoutXML;
 			if (layoutXML) {
-				var itemName:String;
+				var itemName:String, itemCode:String;
 				for each (var item:* in layoutXML.items.item) {
 					itemName = item.@name;
+					itemCode = item.@code;
 					if (itemName == 'kaKou') {
 						continue;
 					}
@@ -254,9 +258,10 @@ package view {
 					}
 					if (itemName) {
 						result = true;
-						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+						YuanJianManager.instance.getYuanJian(itemName, itemCode).isRedundant = true;
 					}
 					itemName = item.@topItem;
+					itemCode = item.@topItemCode;
 					for each (item1 in xml.items.item) {
 						if (itemName == item1.@name) {
 							itemName = null;
@@ -265,10 +270,11 @@ package view {
 					}
 					if (itemName) {
 						result = true;
-						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+						YuanJianManager.instance.getYuanJian(itemName, itemCode).isRedundant = true;
 					}
 					
 					itemName = item.@bottomItem;
+					itemCode = item.@bottomItemCode;
 					for each (item1 in xml.items.item) {
 						if (itemName == item1.@name) {
 							itemName = null;
@@ -277,7 +283,7 @@ package view {
 					}
 					if (itemName) {
 						result = true;
-						YuanJianManager.instance.getYuanJian(itemName).isRedundant = true;
+						YuanJianManager.instance.getYuanJian(itemName, itemCode).isRedundant = true;
 					}
 				}
 			}
