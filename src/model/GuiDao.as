@@ -146,7 +146,7 @@ package model {
 		public function resetYuanJian(removeOutRange:Boolean = false):void {
 			if (_yuanJianArr.length > 0) {
 				_yuanJianArr[0].x = _yuanJianArr[0].offsetX;
-				_yuanJianArr[0].y = (_h - _yuanJianArr[0].reallyHeight) / 2;
+				_yuanJianArr[0].y = ((_h - _yuanJianArr[0].reallyHeight) / 2) + _yuanJianArr[0].offsetY;
 				_resetYuanJianTopAndBottomYuanJian(_yuanJianArr[0]);
 			}
 			for (var i:int = 1; i < _yuanJianArr.length; i++) {

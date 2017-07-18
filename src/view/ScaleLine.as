@@ -68,7 +68,7 @@ package view {
 			_bottomRect = initRect();
 			_leftBottomRect = initRect();
 			_leftRect = initRect();
-			_centerRect = initRect();
+			_centerRect = initRect(0);
 			_centerRightRect = initRect();
 			_centerTopRect = initRect();
 			
@@ -78,8 +78,8 @@ package view {
 			_deleteBtn.addEventListener(MouseEvent.CLICK, _onDelete);
 		}
 		
-		private function initRect():ScaleRect {
-			var r:ScaleRect = new ScaleRect();
+		private function initRect(alpha:Number = 1.0):ScaleRect {
+			var r:ScaleRect = new ScaleRect(alpha);
 			addChild(r);
 			r.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			r.addEventListener(MouseEvent.CLICK, _onMouseClicked);
@@ -172,12 +172,23 @@ package view {
 			_leftBottomRect.y = _parent.reallyHeight;
 			_leftRect.x = 0;
 			_leftRect.y = _parent.reallyHeight >> 1;
+			
 			_centerRect.x = _parent.reallyWidth >> 1;
 			_centerRect.y = _parent.reallyHeight >> 1;
+			_centerRect.setSize(_parent.reallyWidth - 5, _parent.reallyHeight - 5);
 			_centerRightRect.x = _centerRect.x + 10;
 			_centerRightRect.y = _centerRect.y;
 			_centerTopRect.x = _centerRect.x;
 			_centerTopRect.y = _centerRect.y - 10;
+			
+			//_centerRect.x = _parent.reallyWidth >> 1;
+			//_centerRect.y = _parent.reallyHeight >> 1;
+			//_centerRect.setSize(_parent.reallyWidth, _parent.reallyHeight);
+			//
+			//_centerRightRect.x = (_parent.reallyWidth >> 1) + 10;
+			//_centerRightRect.y = _parent.reallyHeight >> 1;
+			//_centerTopRect.x = _parent.reallyWidth >> 1;
+			//_centerTopRect.y = (_parent.reallyHeight >> 1) - 10;
 			
 			/*if (_parent is KaKou){
 			   _leftTopRect.isEnabeld = true;
@@ -386,17 +397,19 @@ package view {
 					break;
 				case _centerRightRect: 
 					if (_parent is YuanJian) {
-						var guiDao:GuiDao;
-						const arr:Array = Main.mainScene.buJuQu.getObjectsUnderPoint(new Point(stageX, stageY));
-						for (var i:int = 0; i < arr.length; i++) {
-							if (arr[i] is GuiDao) {
-								guiDao = arr[i] as GuiDao;
-								if (guiDao == this._parent.parent) {
-									(_parent as YuanJian).offsetX += (stageX - _lastX) / BuJuQu.containerScale;
-									break;
-								}
-							}
-						}
+						//var guiDao:GuiDao;
+						//const arr:Array = Main.mainScene.buJuQu.getObjectsUnderPoint(new Point(stageX, stageY));
+						//for (var i:int = 0; i < arr.length; i++) {
+						//if (arr[i] is GuiDao) {
+						//guiDao = arr[i] as GuiDao;
+						//if (guiDao == this._parent.parent) {
+						//(_parent as YuanJian).offsetX += (stageX - _lastX) / BuJuQu.containerScale;
+						//break;
+						//}
+						//}
+						//}
+						
+						(_parent as YuanJian).offsetX += (stageX - _lastX) / BuJuQu.containerScale;
 					} else {
 						maxX = Main.mainScene.buJuQu.w - _parent.reallyWidth;
 						x = _parent.x + (stageX - _lastX) / BuJuQu.containerScale;

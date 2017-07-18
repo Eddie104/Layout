@@ -19,6 +19,8 @@ package view {
 		
 		protected var _offsetTF:TextField;
 		
+		protected var _offsetY:TextField;
+		
 		public function ShuXingYuanJian(width:int, height:int, type:String = '元件') {
 			super(width, height, type);
 		}
@@ -71,7 +73,7 @@ package view {
 			label = new TextField();
 			label.mouseEnabled = false;
 			label.text = '下轨:';
-			label.x = 200;
+			label.x = 180;
 			label.y = (height - label.textHeight) >> 1;
 			addChild(label);
 			
@@ -86,7 +88,7 @@ package view {
 			_margionBottomTF.width = 50;
 			_margionBottomTF.height = 18;
 			_margionBottomTF.restrict = '0-9';
-			_margionBottomTF.x = 240;
+			_margionBottomTF.x = 220;
 			_margionBottomTF.y = label.y;
 			//_margionBottomTF.addEventListener(Event.CHANGE, _onXChanged);
 			addChild(_margionBottomTF);
@@ -111,6 +113,27 @@ package view {
 			_offsetTF.y = label.y;
 			_offsetTF.addEventListener(Event.CHANGE, _onOffsetChanged);
 			addChild(_offsetTF);
+			
+			label = new TextField();
+			label.mouseEnabled = false;
+			label.text = '调整值:';
+			label.x = 260;
+			label.y = (height - label.textHeight) >> 1;
+			addChild(label);
+			
+			border = _drawInputBorder(30, 18);
+			border.x = 40 + label.x;
+			border.y = label.y;
+			addChild(border);
+			_offsetY = new TextField();
+			_offsetY.type = TextFieldType.INPUT;
+			_offsetY.text = '0';
+			_offsetY.width = 30;
+			_offsetY.height = 18;
+			_offsetY.x = 40 + label.x;
+			_offsetY.y = label.y;
+			_offsetY.addEventListener(Event.CHANGE, _onOffsetYChanged);
+			addChild(_offsetY);
 		}
 		
 		override public function setCurCell(cell:Cell):void {
@@ -121,11 +144,18 @@ package view {
 				_marginTopTF.text = yuanJian.marginTopToXianCao.toString();
 				_margionBottomTF.text = yuanJian.marginBottomToXianCao.toString();
 				_offsetTF.text = ScaleLine.OFFSET.toString();
+				this._offsetY.text = yuanJian.offsetY.toString();
 			}
 		}
 		
 		private function _onOffsetChanged(e:Event):void {
 			ScaleLine.OFFSET = int(_offsetTF.text);
+		}
+		
+		private function _onOffsetYChanged(e:Event):void {
+			if (this._curCell) {
+				(_curCell as YuanJian).offsetY = int(_offsetY.text);
+			}
 		}
 		
 		override protected function _onXChanged(e:Event):void {

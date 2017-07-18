@@ -136,36 +136,32 @@ package view {
 			//this.mouseChildren = false;
 			
 			_dragingBitmap.yuanJianArr = e.yuanJianArr;
-			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}
 		
 		private function _onStartToDragVXianCao(e:LayoutEvent):void {
-			_dragingBitmap.subType = Enum.V_XIAN_CAO;
-			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.subType = Enum.V_XIAN_CAO;			
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}
 		
 		private function _onStartToDragHXianCao(e:LayoutEvent):void {
 			_dragingBitmap.subType = Enum.H_XIAN_CAO;
-			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}
 		
 		private function _onStartToDragGuiDao(e:LayoutEvent):void {
 			_dragingBitmap.subType = Enum.GUI_DAO;
-			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}
@@ -173,17 +169,16 @@ package view {
 		private function _onStartToDragJiaGuiDao(e:LayoutEvent):void {
 			_dragingBitmap.subType = Enum.JIA_GUI_DAO;
 			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}
 		
 		private function _onStartToDragKaKou(e:LayoutEvent):void {
 			_dragingBitmap.subType = Enum.KA_KOU;
-			const p:Point = new Point(mouseX, mouseY);
-			_dragingBitmap.x = p.x;
-			_dragingBitmap.y = p.y;
+			_dragingBitmap.x = mouseX;
+			_dragingBitmap.y = mouseY;
 			_isDraging = true;
 			this.mouseChildren = false;
 		}

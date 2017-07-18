@@ -8,7 +8,7 @@ package model {
 		private var _typeStr:String = '';
 		
 		public function KaKou(width:int, height:int, type:String = '') {
-			super(width, height, 0x00b050, '卡扣', 'kaKou');
+			super(width, height, 0x00b050, '卡扣', 'kaKou', 0);
 			_typeStr = type;
 			_isKaKou = true;
 		}

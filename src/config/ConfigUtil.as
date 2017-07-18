@@ -43,7 +43,7 @@ package config {
 				// <item name="DK01" code="NUM0001" type="DK" rgb="255,0,0" size="50,50" />
 				tempArr = item.@size.split(',');
 				tempArr1 = item.@rgb.split(',');
-				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name, item.@code));
+				YuanJianManager.instance.itemArr.push(new YuanJian(int(tempArr[0]), int(tempArr[1]), ColorUtil.rgbToNumber(int(tempArr1[0]), int(tempArr1[1]), int(tempArr1[2])), item.@name, item.@code, item.@offsetY));
 			}
 			
 			_layoutName = _xml.layout.@name;
@@ -63,12 +63,12 @@ package config {
 			for each (var item:* in _layoutXML.items.item) {
 				if (item.@name != 'kaKou') {
 					if (!YuanJianManager.instance.getYuanJian(item.@name, item.@code)) {
-						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name, item.@code));
+						YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@w), int(item.@h), int(item.@color), item.@name, item.@code, item.@offsetY));
 						if (item.@topItem != undefined) {
-							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@topItemW), int(item.@topItemH), int(item.@topItemColor), item.@topItem, item.@topItemCode));
+							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@topItemW), int(item.@topItemH), int(item.@topItemColor), item.@topItem, item.@topItemCode, 0));
 						}
 						if (item.@bottomItem != undefined) {
-							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@bottomItemW), int(item.@bottomItemH), int(item.@bottomItemColor), item.@bottomItem, item.@bottomItemCode));
+							YuanJianManager.instance.itemArr.push(new YuanJian(int(item.@bottomItemW), int(item.@bottomItemH), int(item.@bottomItemColor), item.@bottomItem, item.@bottomItemCode, 0));
 						}
 					}
 				}

@@ -9,6 +9,8 @@ package view {
 	import flash.events.MouseEvent;
 	import flash.external.ExternalInterface;
 	import flash.geom.Point;
+	import flash.system.System;
+	import flash.text.TextField;
 	import flash.ui.Keyboard;
 	import model.Cell;
 	import model.GuiDao;
@@ -310,6 +312,7 @@ package view {
 								yuanJian = new KaKou(item.@w, item.@h, item.@type);
 							} else {
 								yuanJian = YuanJianManager.instance.getYuanJian(item.@name, item.@code);
+								yuanJian.offsetY = item.@offsetY;
 							}
 							
 							guiDao.initYuanJian(yuanJian, item.@x, item.@y);
@@ -439,11 +442,12 @@ package view {
 			_container.scaleY = scale;
 			containerScale = scale;
 			
-			if (_h < _w) {
-				this._minScale = _viewHeight / _h;
-			} else {
-				this._minScale = _viewWidth / _w;
-			}
+			//if (_h < _w) {
+			//this._minScale = _viewHeight / _h;
+			//} else {
+			//this._minScale = _viewWidth / _w;
+			//}
+			this._minScale = scale;
 			
 			if (!this._keyPool) {
 				this._keyPool = new KeyPoll(Main.mainScene.stage);
@@ -452,6 +456,10 @@ package view {
 		}
 		
 		private function _onKeyUp(e:KeyboardEvent):void {
+			if (this.stage.focus && this.stage.focus is TextField) {
+				return;
+			}
+			
 			if (e.keyCode == Keyboard.DELETE) {
 				this._onDelete();
 			} else if (e.keyCode == Keyboard.C) {
